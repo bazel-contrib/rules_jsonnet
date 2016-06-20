@@ -195,6 +195,7 @@ _jsonnet_common_attrs = {
     "imports": attr.string_list(),
     "jsonnet": attr.label(
         default = Label("//jsonnet:jsonnet"),
+        cfg = HOST_CFG,
         executable = True,
         single_file = True,
     ),
