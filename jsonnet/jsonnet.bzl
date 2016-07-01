@@ -50,8 +50,7 @@ def _jsonnet_library_impl(ctx):
 
 def _jsonnet_toolchain(ctx):
   return struct(
-      jsonnet_path = ctx.file.jsonnet.path,
-      imports = ["-J %s" % ctx.file.std.dirname])
+      jsonnet_path = ctx.file.jsonnet.path)
 
 def _jsonnet_to_json_impl(ctx):
   """Implementation of the jsonnet_to_json rule."""
@@ -66,7 +65,6 @@ def _jsonnet_to_json_impl(ctx):
       ] +
       ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
       ["-J %s" % im for im in depinfo.imports] +
-      toolchain.imports +
       ["-J ."] +
       ["--var '%s'='%s'"
           % (var, jsonnet_vars[var]) for var in jsonnet_vars.keys()] +
@@ -93,7 +91,7 @@ def _jsonnet_to_json_impl(ctx):
     command += [ctx.file.src.path, "-o", compiled_json.path]
 
   compile_inputs = (
-      [ctx.file.src, ctx.file.jsonnet, ctx.file.std] +
+      [ctx.file.src, ctx.file.jsonnet] +
       list(depinfo.transitive_sources))
 
   ctx.action(
@@ -158,7 +156,6 @@ def _jsonnet_to_json_test_impl(ctx):
       ["OUTPUT=$(%s" % ctx.file.jsonnet.short_path] +
       ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
       ["-J %s" % im for im in depinfo.imports] +
-      toolchain.imports +
       ["-J ."] +
       ["--var %s=%s"
           % (var, jsonnet_vars[var]) for var in jsonnet_vars.keys()] +
@@ -180,7 +177,7 @@ def _jsonnet_to_json_test_impl(ctx):
                   executable = True);
 
   test_inputs = (
-      [ctx.file.src, ctx.file.jsonnet, ctx.file.std] +
+      [ctx.file.src, ctx.file.jsonnet] +
       golden_files +
       list(depinfo.transitive_sources))
 
@@ -194,13 +191,9 @@ _jsonnet_common_attrs = {
     ),
     "imports": attr.string_list(),
     "jsonnet": attr.label(
-        default = Label("//jsonnet:jsonnet"),
+        default = Label("@jsonnet//cmd:jsonnet"),
         cfg = HOST_CFG,
         executable = True,
-        single_file = True,
-    ),
-    "std": attr.label(
-        default = Label("//jsonnet:std"),
         single_file = True,
     ),
 }
@@ -253,5 +246,5 @@ def jsonnet_repositories():
   native.git_repository(
       name = "jsonnet",
       remote = "https://github.com/google/jsonnet.git",
-      tag = "v0.8.1",
+      tag = "v0.8.8",
   )
