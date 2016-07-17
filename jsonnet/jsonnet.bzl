@@ -243,8 +243,9 @@ jsonnet_to_json_test = rule(
 )
 
 def jsonnet_repositories():
-  native.git_repository(
+  native.http_archive(
       name = "jsonnet",
-      remote = "https://github.com/google/jsonnet.git",
-      tag = "v0.8.8",
+      url = "http://bazel-mirror.storage.googleapis.com/github.com/google/jsonnet/archive/v0.8.8.tar.gz",
+      sha256 = "668f4ffe1796d22902a485e0c383c1e149dcf7b5364c1bd79e48d8a62b4943b9",
+      strip_prefix = "jsonnet-0.8.8",
   )

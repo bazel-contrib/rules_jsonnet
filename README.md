@@ -21,10 +21,11 @@ To use the Jsonnet rules, add the following to your `WORKSPACE` file to add the
 external repositories for Jsonnet:
 
 ```python
-git_repository(
+http_archive(
     name = "io_bazel_rules_jsonnet",
-    remote = "https://github.com/bazelbuild/rules_jsonnet.git",
-    tag = "0.0.1",
+    url = "https://github.com/bazelbuild/rules_jsonnet/archive/0.0.2.tar.gz",
+    sha256 = "5f788c7719a02ed2483641365f194e9e5340fbe54963d6d6caa09f91454d38b8",
+    stirp_prefix = "rules_jsonnet-0.0.2",
 )
 load("@io_bazel_rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_repositories")
 
