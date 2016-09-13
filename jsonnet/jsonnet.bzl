@@ -14,7 +14,7 @@
 
 """Jsonnet rules for Bazel."""
 
-_JSONNET_FILETYPE = FileType([".jsonnet"])
+_JSONNET_FILETYPE = FileType([".jsonnet", ".libsonnet"])
 
 def _setup_deps(deps):
   """Collects source files and import flags of transitive dependencies.
