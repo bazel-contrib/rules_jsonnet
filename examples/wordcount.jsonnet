@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-local workflow = import "examples/workflow.jsonnet";
+local workflow = import "examples/workflow.libsonnet";
 
 // Workflow that performs a wordcount using shell commands.
 {

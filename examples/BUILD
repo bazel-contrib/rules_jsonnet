@@ -9,7 +9,7 @@ load(
 
 jsonnet_library(
     name = "workflow",
-    srcs = ["workflow.jsonnet"],
+    srcs = ["workflow.libsonnet"],
 )
 
 jsonnet_to_json(

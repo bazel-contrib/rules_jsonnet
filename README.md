@@ -257,17 +257,17 @@ Suppose you have the following directory structure:
     WORKSPACE
     workflows/
         BUILD
-        workflow.jsonnet
+        workflow.libsonnet
         wordcount.jsonnet
         intersection.jsonnet
 ```
 
-Say that `workflow.jsonnet` is a base configuration library for a workflow
+Say that `workflow.libsonnet` is a base configuration library for a workflow
 scheduling system and `wordcount.jsonnet` and `intersection.jsonnet` both
-import `workflow.jsonnet` to define workflows for performing a wordcount and
+import `workflow.libsonnet` to define workflows for performing a wordcount and
 intersection of two files, respectively.
 
-First, create a `jsonnet_library` target with `workflow.jsonnet`:
+First, create a `jsonnet_library` target with `workflow.libsonnet`:
 
 `workflows/BUILD`:
 
@@ -276,7 +276,7 @@ load("@io_bazel_rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_library")
 
 jsonnet_library(
     name = "workflow",
-    srcs = ["workflow.jsonnet"],
+    srcs = ["workflow.libsonnet"],
 )
 ```
 
@@ -469,12 +469,12 @@ Suppose you have the following directory structure:
     WORKSPACE
     config/
         BUILD
-        base_config.jsonnet
+        base_config.libsonnet
         test_config.jsonnet
         test_config.json
 ```
 
-Suppose that `base_config.jsonnet` is a library Jsonnet file, containing the
+Suppose that `base_config.libsonnet` is a library Jsonnet file, containing the
 base configuration for a service. Suppose that `test_config.jsonnet` is a test
 configuration file that is used to test `base_config.jsonnet`, and
 `test_config.json` is the expected JSON output from compiling
@@ -496,7 +496,7 @@ load(
 
 jsonnet_library(
     name = "base_config",
-    srcs = ["base_config.jsonnet"],
+    srcs = ["base_config.libsonnet"],
 )
 
 jsonnet_to_json_test(
@@ -518,7 +518,7 @@ Suppose you have the following directory structure:
     WORKSPACE
     config/
         BUILD
-        base_config.jsonnet
+        base_config.libsonnet
         invalid_config.jsonnet
         invalid_config.output
 ```
@@ -544,7 +544,7 @@ load(
 
 jsonnet_library(
     name = "base_config",
-    srcs = ["base_config.jsonnet"],
+    srcs = ["base_config.libsonnet"],
 )
 
 jsonnet_to_json_test(
