@@ -342,8 +342,8 @@ jsonnet_to_json(
     src = "shell-workflows.jsonnet",
     deps = [":shell-workflows-lib"],
     outs = [
-        "wordcount-workflow.jsonnet",
-        "intersection-workflow.jsonnet",
+        "wordcount-workflow.json",
+        "intersection-workflow.json",
     ],
 )
 ```
