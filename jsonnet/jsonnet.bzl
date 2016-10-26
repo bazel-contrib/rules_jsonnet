@@ -44,9 +44,17 @@ def _jsonnet_library_impl(ctx):
   depinfo = _setup_deps(ctx.attr.deps)
   sources = depinfo.transitive_sources + ctx.files.srcs
   imports = depinfo.imports + ctx.attr.imports
-  return struct(files = set(),
-                transitive_jsonnet_files = sources,
-                imports = imports)
+  transitive_data = set()
+  for dep in ctx.attr.deps:
+    transitive_data += dep.data_runfiles.files
+  return struct(
+      files = set(),
+      transitive_jsonnet_files = sources,
+      imports = imports,
+      runfiles = ctx.runfiles(
+          transitive_files = transitive_data,
+          collect_data = True,
+      ))
 
 def _jsonnet_toolchain(ctx):
   return struct(
@@ -76,22 +84,28 @@ def _jsonnet_to_json_impl(ctx):
   # -m flag for multiple outputs. Otherwise, jsonnet will write the resulting
   # JSON to stdout, which is redirected into a single JSON output file.
   if len(ctx.attr.outs) > 1 or ctx.attr.multiple_outputs:
-    output_json_files = [ctx.new_file(ctx.configuration.bin_dir, out.name)
-                         for out in ctx.attr.outs]
-    outputs += output_json_files
-    command += ["-m", output_json_files[0].dirname, ctx.file.src.path]
-  else:
-    if len(ctx.attr.outs) > 1:
+    outputs += ctx.outputs.outs
+    command += ["-m", ctx.outputs.outs[0].dirname, ctx.file.src.path]
+  elif len(ctx.attr.outs) > 1:
       fail("Only one file can be specified in outs if multiple_outputs is " +
            "not set.")
-
-    compiled_json = ctx.new_file(ctx.configuration.bin_dir,
-                                 ctx.attr.outs[0].name)
+  else:
+    compiled_json = ctx.outputs.outs[0]
     outputs += [compiled_json]
     command += [ctx.file.src.path, "-o", compiled_json.path]
 
+  transitive_data = set()
+  for dep in ctx.attr.deps:
+    transitive_data + dep.data_runfiles.files
+
+  runfiles = ctx.runfiles(
+      collect_data = True,
+      transitive_files = transitive_data,
+  )
+
   compile_inputs = (
       [ctx.file.src, ctx.file.jsonnet] +
+      list(runfiles.files) +
       list(depinfo.transitive_sources))
 
   ctx.action(
@@ -179,13 +193,22 @@ def _jsonnet_to_json_test_impl(ctx):
                   content = "\n".join(command),
                   executable = True);
 
+  transitive_data = set()
+  for dep in ctx.attr.deps:
+    transitive_data += dep.data_runfiles.files
+
   test_inputs = (
       [ctx.file.src, ctx.file.jsonnet] +
       golden_files +
+      list(transitive_data) +
       list(depinfo.transitive_sources))
 
   return struct(
-      runfiles = ctx.runfiles(files = test_inputs, collect_data = True))
+      runfiles = ctx.runfiles(
+          files = test_inputs,
+          transitive_files = transitive_data,
+          collect_data = True,
+      ))
 
 _jsonnet_common_attrs = {
     "deps": attr.label_list(
@@ -195,9 +218,13 @@ _jsonnet_common_attrs = {
     "imports": attr.string_list(),
     "jsonnet": attr.label(
         default = Label("@jsonnet//cmd:jsonnet"),
-        cfg = HOST_CFG,
+        cfg = "host",
         executable = True,
         single_file = True,
+    ),
+    "data": attr.label_list(
+        allow_files = True,
+        cfg = "data",
     ),
 }
 
