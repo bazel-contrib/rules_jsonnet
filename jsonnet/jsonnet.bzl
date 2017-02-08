@@ -75,9 +75,9 @@ def _jsonnet_to_json_impl(ctx):
       ["-J %s" % im for im in depinfo.imports] +
       ["-J ."] +
       ["--var '%s'='%s'"
-          % (var, jsonnet_vars[var]) for var in jsonnet_vars.keys()] +
+       % (var, jsonnet_vars[var]) for var in jsonnet_vars.keys()] +
       ["--code-var '%s'='%s'"
-          % (var, jsonnet_code_vars[var]) for var in jsonnet_code_vars.keys()])
+       % (var, jsonnet_code_vars[var]) for var in jsonnet_code_vars.keys()])
 
   outputs = []
   # If multiple_outputs is set to true, then jsonnet will be invoked with the
@@ -114,7 +114,7 @@ def _jsonnet_to_json_impl(ctx):
       mnemonic = "Jsonnet",
       command = " ".join(command),
       use_default_shell_env = True,
-      progress_message = "Compiling Jsonnet to JSON for " + ctx.label.name);
+      progress_message = "Compiling Jsonnet to JSON for " + ctx.label.name)
 
 _EXIT_CODE_COMPARE_COMMAND = """
 EXIT_CODE=$?
@@ -129,7 +129,7 @@ fi
 """
 
 _DIFF_COMMAND = """
-GOLDEN=$(cat %s)
+GOLDEN=$(%s %s)
 if [ "$OUTPUT" != "$GOLDEN" ]; then
   echo "FAIL (output mismatch): %s"
   echo "Diff:"
@@ -141,7 +141,7 @@ fi
 """
 
 _REGEX_DIFF_COMMAND = """
-GOLDEN_REGEX=$(cat %s)
+GOLDEN_REGEX=$(%s %s)
 if [[ ! "$OUTPUT" =~ $GOLDEN_REGEX ]]; then
   echo "FAIL (regex mismatch): %s"
   echo "Output: $OUTPUT"
@@ -159,11 +159,17 @@ def _jsonnet_to_json_test_impl(ctx):
   if ctx.file.golden:
     golden_files += [ctx.file.golden]
     if ctx.attr.regex:
-      diff_command = _REGEX_DIFF_COMMAND % (ctx.file.golden.short_path,
-                                           ctx.label.name)
+      diff_command = _REGEX_DIFF_COMMAND % (
+          ctx.file.jsonnet.short_path,
+          ctx.file.golden.short_path,
+          ctx.label.name,
+      )
     else:
-      diff_command = _DIFF_COMMAND % (ctx.file.golden.short_path,
-                                     ctx.label.name)
+      diff_command = _DIFF_COMMAND % (
+          ctx.file.jsonnet.short_path,
+          ctx.file.golden.short_path,
+          ctx.label.name,
+      )
 
   jsonnet_vars = ctx.attr.vars
   jsonnet_code_vars = ctx.attr.code_vars
@@ -173,9 +179,9 @@ def _jsonnet_to_json_test_impl(ctx):
       ["-J %s" % im for im in depinfo.imports] +
       ["-J ."] +
       ["--var %s=%s"
-          % (var, jsonnet_vars[var]) for var in jsonnet_vars.keys()] +
+       % (var, jsonnet_vars[var]) for var in jsonnet_vars.keys()] +
       ["--code-var %s=%s"
-          % (var, jsonnet_code_vars[var]) for var in jsonnet_code_vars.keys()] +
+       % (var, jsonnet_code_vars[var]) for var in jsonnet_code_vars.keys()] +
       [
           ctx.file.src.path,
           "2>&1)",
