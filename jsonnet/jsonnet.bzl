@@ -54,8 +54,8 @@ def _setup_deps(deps):
       imports: List of Strings containing import flags set by transitive
           dependency targets.
   """
-  transitive_sources = set(order="compile")
-  imports = set()
+  transitive_sources = depset(order="postorder")
+  imports = depset()
   for dep in deps:
     transitive_sources += dep.transitive_jsonnet_files
     imports += ["%s/%s" % (dep.label.package, im) for im in dep.imports]
@@ -69,11 +69,11 @@ def _jsonnet_library_impl(ctx):
   depinfo = _setup_deps(ctx.attr.deps)
   sources = depinfo.transitive_sources + ctx.files.srcs
   imports = depinfo.imports + ctx.attr.imports
-  transitive_data = set()
+  transitive_data = depset()
   for dep in ctx.attr.deps:
     transitive_data += dep.data_runfiles.files
   return struct(
-      files = set(),
+      files = depset(),
       transitive_jsonnet_files = sources,
       imports = imports,
       runfiles = ctx.runfiles(
@@ -119,7 +119,7 @@ def _jsonnet_to_json_impl(ctx):
     outputs += [compiled_json]
     command += [ctx.file.src.path, "-o", compiled_json.path]
 
-  transitive_data = set()
+  transitive_data = depset()
   for dep in ctx.attr.deps:
     transitive_data + dep.data_runfiles.files
 
@@ -229,7 +229,7 @@ def _jsonnet_to_json_test_impl(ctx):
                   content = "\n".join(command),
                   executable = True);
 
-  transitive_data = set()
+  transitive_data = depset()
   for dep in ctx.attr.deps:
     transitive_data += dep.data_runfiles.files
 
