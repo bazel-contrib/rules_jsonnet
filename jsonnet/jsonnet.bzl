@@ -98,7 +98,9 @@ def _jsonnet_to_json_impl(ctx):
       ] +
       ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
       ["-J %s" % im for im in depinfo.imports] +
-      ["-J ."] +
+      ["-J .",
+       "-J %s" % ctx.genfiles_dir.path,
+       "-J %s" % ctx.bin_dir.path] +
       ["--var '%s'='%s'"
        % (var, jsonnet_vars[var]) for var in jsonnet_vars.keys()] +
       ["--code-var '%s'='%s'"
