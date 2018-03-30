@@ -102,7 +102,7 @@ def _jsonnet_to_json_impl(ctx):
        "-J %s" % ctx.genfiles_dir.path,
        "-J %s" % ctx.bin_dir.path] +
       ["--var '%s'='%s'"
-       % (var, jsonnet_vars[var]) for var in jsonnet_vars.keys()] +
+       % (var, ctx.expand_make_variables("vars", jsonnet_vars[var],{})) for var in jsonnet_vars.keys()] +
       ["--code-var '%s'='%s'"
        % (var, jsonnet_code_vars[var]) for var in jsonnet_code_vars.keys()])
 
@@ -211,7 +211,7 @@ def _jsonnet_to_json_test_impl(ctx):
       ["-J %s" % im for im in depinfo.imports] +
       ["-J ."] +
       ["--var %s=%s"
-       % (var, jsonnet_vars[var]) for var in jsonnet_vars.keys()] +
+       % (var, ctx.expand_make_variables("vars", jsonnet_vars[var],{})) for var in jsonnet_vars.keys()] +
       ["--code-var %s=%s"
        % (var, jsonnet_code_vars[var]) for var in jsonnet_code_vars.keys()] +
       [
@@ -369,7 +369,8 @@ Args:
     }
     ```
   imports: List of import `-J` flags to be passed to the `jsonnet` compiler.
-  vars: Map of variables to pass to jsonnet via `--var key=value` flags.
+  vars: Map of variables to pass to jsonnet via `--var key=value` flags. Values
+    containing make variables will be expanded.
   code_vars: Map of code variables to pass to jsonnet via `--code-var key-value`
     flags.
 
@@ -503,7 +504,8 @@ Args:
   src: The `.jsonnet` file to convert to JSON.
   deps: List of targets that are required by the `src` Jsonnet file.
   imports: List of import `-J` flags to be passed to the `jsonnet` compiler.
-  vars: Map of variables to pass to jsonnet via `--var key=value` flags.
+  vars: Map of variables to pass to jsonnet via `--var key=value` flags. Values
+    containing make variables will be expanded.
   code_vars: Map of code variables to pass to jsonnet via `--code-var key-value`
     flags.
   golden: The expected (combined stdout and stderr) output to compare to the
