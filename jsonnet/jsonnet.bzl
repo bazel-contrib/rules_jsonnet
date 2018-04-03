@@ -215,7 +215,7 @@ def _jsonnet_to_json_test_impl(ctx):
       ["--code-var %s=%s"
        % (var, jsonnet_code_vars[var]) for var in jsonnet_code_vars.keys()] +
       [
-          ctx.file.src.path,
+          ctx.file.src.short_path,
           "2>&1)",
       ])
 
