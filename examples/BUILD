@@ -71,3 +71,16 @@ jsonnet_to_json_test(
     src = "invalid.jsonnet",
     error = 1,
 )
+
+jsonnet_to_json_test(
+    name = "generated_src_test",
+    src = ":generated",
+    golden = ":generated"
+)
+
+genrule(
+    name = "generated",
+    outs = ["generated.jsonnet"],
+    testonly = 1,
+    cmd = "echo {} > $@"
+)
