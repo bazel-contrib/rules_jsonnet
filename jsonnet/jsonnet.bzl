@@ -106,9 +106,9 @@ def _jsonnet_to_json_impl(ctx):
       ["--var '%s'='%s'"
        % (var, ctx.expand_make_variables("vars", jsonnet_vars[var],{})) for var in jsonnet_vars.keys()] +
       ["--code-var '%s'='%s'"
-       % (var, jsonnet_code_vars[var]) for var in jsonnet_code_vars.keys()])
+       % (var, jsonnet_code_vars[var]) for var in jsonnet_code_vars.keys()] +
       ["--file '%s'='%s'"
-       % (var, jsonnet_files[var]) for var in jsonnet_files.keys()])
+       % (var, jsonnet_files[var]) for var in jsonnet_files.keys()] +
       ["--code-file '%s'='%s'"
        % (var, jsonnet_code_files[var]) for var in jsonnet_code_files.keys()])
 
