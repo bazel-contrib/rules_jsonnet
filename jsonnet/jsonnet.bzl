@@ -91,6 +91,8 @@ def _jsonnet_to_json_impl(ctx):
   toolchain = _jsonnet_toolchain(ctx)
   jsonnet_vars = ctx.attr.vars
   jsonnet_code_vars = ctx.attr.code_vars
+  jsonnet_files = ctx.attr.files
+  jsonnet_code_files = ctx.attr.code_files
   command = (
       [
           "set -e;",
@@ -105,6 +107,10 @@ def _jsonnet_to_json_impl(ctx):
        % (var, ctx.expand_make_variables("vars", jsonnet_vars[var],{})) for var in jsonnet_vars.keys()] +
       ["--code-var '%s'='%s'"
        % (var, jsonnet_code_vars[var]) for var in jsonnet_code_vars.keys()])
+      ["--file '%s'='%s'"
+       % (var, jsonnet_files[var]) for var in jsonnet_files.keys()])
+      ["--code-file '%s'='%s'"
+       % (var, jsonnet_code_files[var]) for var in jsonnet_code_files.keys()])
 
   outputs = []
   # If multiple_outputs is set to true, then jsonnet will be invoked with the
@@ -320,6 +326,8 @@ _jsonnet_compile_attrs = {
     ),
     "vars": attr.string_dict(),
     "code_vars": attr.string_dict(),
+    "files": attr.string_dict(),
+    "code_files": attr.string_dict(),
 }
 
 _jsonnet_to_json_attrs = {
