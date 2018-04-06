@@ -71,3 +71,24 @@ jsonnet_to_json_test(
     src = "invalid.jsonnet",
     error = 1,
 )
+
+jsonnet_to_json(
+    name = "files",
+    src = "files.jsonnet",
+    outs = ["files.json"],
+    files = [":file.txt"],
+    file_vars = ["test"],
+    code_files = [":codefile.libsonnet"],
+    code_file_vars = ["codefile"],
+)
+
+jsonnet_to_json_test(
+    name = "files_test",
+    size = "small",
+    src = "files.jsonnet",
+    files = [":file.txt"],
+    file_vars = ["test"],
+    code_files = [":codefile.libsonnet"],
+    code_file_vars = ["codefile"],
+    golden = "files.out",
+)

@@ -92,7 +92,9 @@ def _jsonnet_to_json_impl(ctx):
   jsonnet_vars = ctx.attr.vars
   jsonnet_code_vars = ctx.attr.code_vars
   jsonnet_files = ctx.attr.files
+  jsonnet_file_vars = ctx.attr.file_vars
   jsonnet_code_files = ctx.attr.code_files
+  jsonnet_code_file_vars = ctx.attr.code_file_vars
   command = (
       [
           "set -e;",
@@ -107,10 +109,10 @@ def _jsonnet_to_json_impl(ctx):
        % (var, ctx.expand_make_variables("vars", jsonnet_vars[var],{})) for var in jsonnet_vars.keys()] +
       ["--code-var '%s'='%s'"
        % (var, jsonnet_code_vars[var]) for var in jsonnet_code_vars.keys()] +
-      ["--file '%s'='%s'"
-       % (var, jsonnet_files[var]) for var in jsonnet_files.keys()] +
-      ["--code-file '%s'='%s'"
-       % (var, jsonnet_code_files[var]) for var in jsonnet_code_files.keys()])
+      ["--file %s=%s"
+       % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_file_vars, jsonnet_files)] +
+      ["--code-file %s=%s"
+       % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_code_file_vars, jsonnet_code_files)])
 
   outputs = []
   # If multiple_outputs is set to true, then jsonnet will be invoked with the
@@ -131,8 +133,14 @@ def _jsonnet_to_json_impl(ctx):
   for dep in ctx.attr.deps:
     transitive_data + dep.data_runfiles.files
 
+  files = (
+      [list(jfile.files)[0] for jfile in jsonnet_files] +
+      [list(jfile.files)[0] for jfile in jsonnet_code_files]
+  )
+
   runfiles = ctx.runfiles(
       collect_data = True,
+      files = files,
       transitive_files = transitive_data,
   )
 
@@ -211,6 +219,10 @@ def _jsonnet_to_json_test_impl(ctx):
 
   jsonnet_vars = ctx.attr.vars
   jsonnet_code_vars = ctx.attr.code_vars
+  jsonnet_files = ctx.attr.files
+  jsonnet_file_vars = ctx.attr.file_vars
+  jsonnet_code_files = ctx.attr.code_files
+  jsonnet_code_file_vars = ctx.attr.code_file_vars
   jsonnet_command = " ".join(
       ["OUTPUT=$(%s" % ctx.executable.jsonnet.short_path] +
       ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
@@ -220,6 +232,10 @@ def _jsonnet_to_json_test_impl(ctx):
        % (var, ctx.expand_make_variables("vars", jsonnet_vars[var],{})) for var in jsonnet_vars.keys()] +
       ["--code-var %s=%s"
        % (var, jsonnet_code_vars[var]) for var in jsonnet_code_vars.keys()] +
+      ["--file %s=%s"
+       % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_file_vars, jsonnet_files)] +
+      ["--code-file %s=%s"
+       % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_code_file_vars, jsonnet_code_files)] +
       [
           ctx.file.src.path,
           "2>&1)",
@@ -245,7 +261,9 @@ def _jsonnet_to_json_test_impl(ctx):
       [ctx.file.src, ctx.executable.jsonnet] +
       golden_files +
       list(transitive_data) +
-      list(depinfo.transitive_sources))
+      list(depinfo.transitive_sources) +
+      [list(jfile.files)[0] for jfile in jsonnet_files] +
+      [list(jfile.files)[0] for jfile in jsonnet_code_files])
 
   return struct(
       runfiles = ctx.runfiles(
@@ -326,8 +344,14 @@ _jsonnet_compile_attrs = {
     ),
     "vars": attr.string_dict(),
     "code_vars": attr.string_dict(),
-    "files": attr.string_dict(),
-    "code_files": attr.string_dict(),
+    "files": attr.label_list(
+        allow_files = True,
+    ),
+    "file_vars": attr.string_list(),
+    "code_files": attr.label_list(
+        allow_files = True,
+    ),
+    "code_file_vars": attr.string_list(),
 }
 
 _jsonnet_to_json_attrs = {

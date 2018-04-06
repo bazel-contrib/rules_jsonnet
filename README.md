@@ -250,6 +250,46 @@ local foo = import "foo.jsonnet";
         </p>
       </td>
     </tr>
+        <tr>
+      <td><code>files</code></td>
+      <td>
+        <code>List of labels, optional but needed together with file_vars</code>
+        <p>
+          List of files that map to the var name defined in file_vars at the same index and together are passed to jsonnet via
+          <code>--file var=file</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>file_vars</code></td>
+      <td>
+        <code>List of string, optional but needed together with files</code>
+        <p>
+          List of var names that maps to the file defined in files at the same index and together are passed to jsonnet via
+          <code>--file var=file</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>code_files</code></td>
+      <td>
+        <code>String dict, optional</code>
+        <p>
+          List of jsonnet code files that map to the var name defined in code_file_vars at the same index and together are passed to jsonnet via
+          <code>--code-file var=file</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>code_file_vars</code></td>
+      <td>
+        <code>String dict, optional</code>
+        <p>
+          List of var names that maps to the code file defined in code_files at the same index and together are passed to jsonnet via
+          <code>--code-file var=file</code>.
+        </p>
+      </td>
+    </tr>
   </tbody>
 </table>
 
@@ -406,7 +446,7 @@ jsonnet_to_json_test(name, src, deps, imports, golden, error=0, regex=False)
     <tr>
       <td><code>imports</code></td>
       <td>
-        <code>List of strings, optional</code>
+        <code>codefileList of strings, optional</code>
         <p>
           List of import <code>-J</code> flags to be passed to the
           <code>jsonnet</code> compiler.
@@ -429,6 +469,46 @@ jsonnet_to_json_test(name, src, deps, imports, golden, error=0, regex=False)
         <p>
           Map of code variables to pass to jsonnet via
           <code>--code-var key=value</code>.
+        </p>
+      </td>
+    </tr>
+        <tr>
+      <td><code>files</code></td>
+      <td>
+        <code>List of labels, optional but needed together with file_vars</code>
+        <p>
+          List of files that map to the var name defined in file_vars at the same index and together are passed to jsonnet via
+          <code>--file var=file</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>file_vars</code></td>
+      <td>
+        <code>List of string, optional but needed together with files</code>
+        <p>
+          List of var names that maps to the file defined in files at the same index and together are passed to jsonnet via
+          <code>--file var=file</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>code_files</code></td>
+      <td>
+        <code>String dict, optional</code>
+        <p>
+          List of jsonnet code files that map to the var name defined in code_file_vars at the same index and together are passed to jsonnet via
+          <code>--code-file var=file</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>code_file_vars</code></td>
+      <td>
+        <code>String dict, optional</code>
+        <p>
+          List of var names that maps to the code file defined in code_files at the same index and together are passed to jsonnet via
+          <code>--code-file var=file</code>.
         </p>
       </td>
     </tr>
