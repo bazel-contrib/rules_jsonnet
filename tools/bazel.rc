@@ -1,0 +1,2 @@
+build @io_bazel_rules_jsonnet//examples:files_test --action_env MYTEST="test" --action_env MYJSONNET="{code: 'some code'}"
+build @io_bazel_rules_jsonnet//examples:files --action_env MYTEST="test" --action_env MYJSONNET="{code: 'some code'}"
