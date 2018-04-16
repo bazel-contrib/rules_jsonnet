@@ -92,3 +92,16 @@ jsonnet_to_json_test(
     code_file_vars = ["codefile"],
     golden = "files.out",
 )
+
+jsonnet_to_json_test(
+    name = "generated_src_test",
+    src = ":generated",
+    golden = ":generated"
+)
+
+genrule(
+    name = "generated",
+    outs = ["generated.jsonnet"],
+    testonly = 1,
+    cmd = "echo {} > $@"
+)

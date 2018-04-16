@@ -1,2 +1,2 @@
 RUNTIME ERROR: Foo.
-	external/examples/invalid.jsonnet:15:1-12	
+	../examples/invalid.jsonnet:15:1-12	

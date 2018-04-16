@@ -237,7 +237,7 @@ def _jsonnet_to_json_test_impl(ctx):
       ["--code-file %s=%s"
        % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_code_file_vars, jsonnet_code_files)] +
       [
-          ctx.file.src.path,
+          ctx.file.src.short_path,
           "2>&1)",
       ])
 
