@@ -232,61 +232,80 @@ local foo = import "foo.jsonnet";
       </td>
     </tr>
     <tr>
-      <td><code>vars</code></td>
+      <td><code>ext_strs</code></td>
       <td>
         <code>String dict, optional</code>
         <p>
-          Map of variables to pass to jsonnet via <code>--var key=value</code>.
+          Map of strings to pass to jsonnet as external variables via <code>--ext-str key=value</code>.
         </p>
       </td>
     </tr>
     <tr>
-      <td><code>code_vars</code></td>
+      <td><code>ext_str_envs</code></td>
       <td>
-        <code>String dict, optional</code>
+        <code>String list, optional</code>
         <p>
-          Map of code variables to pass to jsonnet via
-          <code>--code-var key=value</code>.
+          List of env var names containing strings to pass to jsonnet as external variables via <code>--ext-str key</code>.
         </p>
       </td>
     </tr>
-        <tr>
-      <td><code>files</code></td>
+    <tr>
+      <td><code>ext_code</code></td>
+      <td>
+        <code>String dict, optional</code>
+        <p>
+          Map of code to pass to jsonnet as external variables via
+          <code>--ext-code key=value</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>ext_code_envs</code></td>
+      <td>
+        <code>String list, optional</code>
+        <p>
+          List of env var names containing jsonnet code to pass to jsonnet as external variables via
+          <code>--ext-code key</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>ext_str_files</code></td>
       <td>
         <code>List of labels, optional but needed together with file_vars</code>
         <p>
-          List of files that map to the var name defined in file_vars at the same index and together are passed to jsonnet via
-          <code>--file var=file</code>.
+          List of string files that map to the var name defined in file_vars at the same index and together are passed to jsonnet via
+          <code>--ext-str-file var=file</code>.
         </p>
       </td>
     </tr>
     <tr>
-      <td><code>file_vars</code></td>
+      <td><code>ext_str_file_vars</code></td>
       <td>
         <code>List of string, optional but needed together with files</code>
         <p>
           List of var names that maps to the file defined in files at the same index and together are passed to jsonnet via
-          <code>--file var=file</code>.
+          <code>--ext-str-file var=file</code>.
         </p>
       </td>
     </tr>
     <tr>
-      <td><code>code_files</code></td>
+      <td><code>ext_code_files</code></td>
       <td>
         <code>String dict, optional</code>
         <p>
-          List of jsonnet code files that map to the var name defined in code_file_vars at the same index and together are passed to jsonnet via
-          <code>--code-file var=file</code>.
+          List of jsonnet code files that map to the var name defined in ext_code_file_vars at the same index and together are passed to jsonnet via
+          <code>--ext-code-file var=file</code>.
         </p>
       </td>
     </tr>
     <tr>
-      <td><code>code_file_vars</code></td>
+      <td><code>ext_code_file_vars</code></td>
       <td>
         <code>String dict, optional</code>
         <p>
           List of var names that maps to the code file defined in code_files at the same index and together are passed to jsonnet via
-          <code>--code-file var=file</code>.
+          <code>--ext-code-file var=file</code>.
         </p>
       </td>
     </tr>
@@ -454,61 +473,80 @@ jsonnet_to_json_test(name, src, deps, imports, golden, error=0, regex=False)
       </td>
     </tr>
     <tr>
-      <td><code>vars</code></td>
+      <td><code>ext_strs</code></td>
       <td>
         <code>String dict, optional</code>
         <p>
-          Map of variables to pass to jsonnet via <code>--var key=value</code>.
+          Map of strings to pass to jsonnet as external variables via <code>--ext-str key=value</code>.
         </p>
       </td>
     </tr>
     <tr>
-      <td><code>code_vars</code></td>
+      <td><code>ext_str_envs</code></td>
       <td>
-        <code>String dict, optional</code>
+        <code>String list, optional</code>
         <p>
-          Map of code variables to pass to jsonnet via
-          <code>--code-var key=value</code>.
+          List of env var names containing strings to pass to jsonnet as external variables via <code>--ext-str key</code>.
         </p>
       </td>
     </tr>
-        <tr>
-      <td><code>files</code></td>
+    <tr>
+      <td><code>ext_code</code></td>
+      <td>
+        <code>String dict, optional</code>
+        <p>
+          Map of code to pass to jsonnet as external variables via
+          <code>--ext-code key=value</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>ext_code_envs</code></td>
+      <td>
+        <code>String list, optional</code>
+        <p>
+          List of env var names containing jsonnet code to pass to jsonnet as external variables via
+          <code>--ext-code key</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>ext_str_files</code></td>
       <td>
         <code>List of labels, optional but needed together with file_vars</code>
         <p>
-          List of files that map to the var name defined in file_vars at the same index and together are passed to jsonnet via
-          <code>--file var=file</code>.
+          List of string files that map to the var name defined in file_vars at the same index and together are passed to jsonnet via
+          <code>--ext-str-file var=file</code>.
         </p>
       </td>
     </tr>
     <tr>
-      <td><code>file_vars</code></td>
+      <td><code>ext_str_file_vars</code></td>
       <td>
         <code>List of string, optional but needed together with files</code>
         <p>
           List of var names that maps to the file defined in files at the same index and together are passed to jsonnet via
-          <code>--file var=file</code>.
+          <code>--ext-str-file var=file</code>.
         </p>
       </td>
     </tr>
     <tr>
-      <td><code>code_files</code></td>
+      <td><code>ext_code_files</code></td>
       <td>
         <code>String dict, optional</code>
         <p>
-          List of jsonnet code files that map to the var name defined in code_file_vars at the same index and together are passed to jsonnet via
-          <code>--code-file var=file</code>.
+          List of jsonnet code files that map to the var name defined in ext_code_file_vars at the same index and together are passed to jsonnet via
+          <code>--ext-code-file var=file</code>.
         </p>
       </td>
     </tr>
     <tr>
-      <td><code>code_file_vars</code></td>
+      <td><code>ext_code_file_vars</code></td>
       <td>
         <code>String dict, optional</code>
         <p>
           List of var names that maps to the code file defined in code_files at the same index and together are passed to jsonnet via
-          <code>--code-file var=file</code>.
+          <code>--ext-code-file var=file</code>.
         </p>
       </td>
     </tr>

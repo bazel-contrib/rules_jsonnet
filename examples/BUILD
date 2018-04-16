@@ -76,20 +76,24 @@ jsonnet_to_json(
     name = "files",
     src = "files.jsonnet",
     outs = ["files.json"],
-    files = [":file.txt"],
-    file_vars = ["test"],
-    code_files = [":codefile.libsonnet"],
-    code_file_vars = ["codefile"],
+    ext_str_envs = ["MYTEST"],
+    ext_code_envs = ["MYJSONNET"],
+    ext_str_files = [":file.txt"],
+    ext_str_file_vars = ["test"],
+    ext_code_files = [":codefile.libsonnet"],
+    ext_code_file_vars = ["codefile"],
 )
 
 jsonnet_to_json_test(
     name = "files_test",
     size = "small",
     src = "files.jsonnet",
-    files = [":file.txt"],
-    file_vars = ["test"],
-    code_files = [":codefile.libsonnet"],
-    code_file_vars = ["codefile"],
+    ext_str_envs = ["MYTEST"],
+    ext_code_envs = ["MYJSONNET"],
+    ext_str_files = [":file.txt"],
+    ext_str_file_vars = ["test"],
+    ext_code_files = [":codefile.libsonnet"],
+    ext_code_file_vars = ["codefile"],
     golden = "files.out",
 )
 
