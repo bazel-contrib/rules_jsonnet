@@ -77,7 +77,7 @@ def _jsonnet_library_impl(ctx):
   """Implementation of the jsonnet_library rule."""
   depinfo = _setup_deps(ctx.attr.deps)
   sources = depinfo.transitive_sources + ctx.files.srcs
-  imports = depinfo.imports + ctx.attr.imports
+  imports = depinfo.imports + ctx.attr.imports + [src.dirname for src in ctx.files.srcs]
   transitive_data = depset()
   for dep in ctx.attr.deps:
     transitive_data += dep.data_runfiles.files
