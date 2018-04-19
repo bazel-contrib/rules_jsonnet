@@ -41,6 +41,15 @@ jsonnet_repositories()
 
 _JSONNET_FILETYPE = FileType([".jsonnet", ".libsonnet", ".json"])
 
+def _add_prefix_to_imports(label, imports):
+  imports_prefix = ""
+  if label.workspace_root:
+    imports_prefix += label.workspace_root + "/"
+  if label.package:
+    imports_prefix += label.package + "/"
+
+  return ["%s%s" % (imports_prefix, im) for im in imports]
+
 def _setup_deps(deps):
   """Collects source files and import flags of transitive dependencies.
 
@@ -58,7 +67,7 @@ def _setup_deps(deps):
   imports = depset()
   for dep in deps:
     transitive_sources += dep.transitive_jsonnet_files
-    imports += ["%s/%s" % (dep.label.package, im) for im in dep.imports]
+    imports += _add_prefix_to_imports(dep.label, dep.imports)
 
   return struct(
       transitive_sources = transitive_sources,
@@ -96,8 +105,7 @@ def _jsonnet_to_json_impl(ctx):
           "set -e;",
           toolchain.jsonnet_path,
       ] +
-      ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
-      ["-J %s" % im for im in depinfo.imports] +
+      ["-J %s" % im for im in depinfo.imports + _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
       ["-J .",
        "-J %s" % ctx.genfiles_dir.path,
        "-J %s" % ctx.bin_dir.path] +
@@ -207,8 +215,7 @@ def _jsonnet_to_json_test_impl(ctx):
   jsonnet_code_vars = ctx.attr.code_vars
   jsonnet_command = " ".join(
       ["OUTPUT=$(%s" % ctx.executable.jsonnet.short_path] +
-      ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
-      ["-J %s" % im for im in depinfo.imports] +
+      ["-J %s" % im for im in depinfo.imports + _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
       ["-J ."] +
       ["--var %s=%s"
        % (var, ctx.expand_make_variables("vars", jsonnet_vars[var],{})) for var in jsonnet_vars.keys()] +
