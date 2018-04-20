@@ -107,17 +107,17 @@ def _jsonnet_to_json_impl(ctx):
       ["-J .",
        "-J %s" % ctx.genfiles_dir.path,
        "-J %s" % ctx.bin_dir.path] +
-      ["--var '%s'='%s'"
+      ["--ext-str '%s'='%s'"
        % (var, ctx.expand_make_variables("vars", jsonnet_ext_strs[var],{})) for var in jsonnet_ext_strs.keys()] +
-      ["--var '%s'"
+      ["--ext-str '%s'"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
-      ["--code-var '%s'='%s'"
+      ["--ext-code '%s'='%s'"
        % (var, jsonnet_ext_code[var]) for var in jsonnet_ext_code.keys()] +
-      ["--code-var '%s'"
+      ["--ext-code '%s'"
        % ext_code_env for ext_code_env in jsonnet_ext_code_envs] +
-      ["--file %s=%s"
+      ["--ext-str-file %s=%s"
        % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
-      ["--code-file %s=%s"
+      ["--ext-code-file %s=%s"
        % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)])
 
   outputs = []
@@ -236,17 +236,17 @@ def _jsonnet_to_json_test_impl(ctx):
       ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
       ["-J %s" % im for im in depinfo.imports] +
       ["-J ."] +
-      ["--var %s=%s"
+      ["--ext-str %s=%s"
        % (var, ctx.expand_make_variables("vars", jsonnet_ext_strs[var],{})) for var in jsonnet_ext_strs.keys()] +
-      ["--var %s"
+      ["--ext-str %s"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
-      ["--code-var %s=%s"
+      ["--ext-code %s=%s"
        % (var, jsonnet_ext_code[var]) for var in jsonnet_ext_code.keys()] +
-      ["--code-var %s"
+      ["--ext-code %s"
        % ext_code_env for ext_code_env in jsonnet_ext_code_envs] +
-      ["--file %s=%s"
+      ["--ext-str-file %s=%s"
        % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
-      ["--code-file %s=%s"
+      ["--ext-code-file %s=%s"
        % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] +
       [
           ctx.file.src.short_path,
