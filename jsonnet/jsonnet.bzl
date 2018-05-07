@@ -39,7 +39,11 @@ jsonnet_repositories()
 ```
 """
 
-_JSONNET_FILETYPE = FileType([".jsonnet", ".libsonnet", ".json"])
+_JSONNET_FILETYPE = [
+    ".jsonnet",
+    ".libsonnet",
+    ".json",
+]
 
 def _setup_deps(deps):
   """Collects source files and import flags of transitive dependencies.
@@ -85,6 +89,9 @@ def _jsonnet_toolchain(ctx):
   return struct(
       jsonnet_path = ctx.executable.jsonnet.path)
 
+def _quote(s):
+  return "'" + s.replace("'", "'\\''") + "'"
+
 def _jsonnet_to_json_impl(ctx):
   """Implementation of the jsonnet_to_json rule."""
   depinfo = _setup_deps(ctx.attr.deps)
@@ -107,8 +114,8 @@ def _jsonnet_to_json_impl(ctx):
       ["-J .",
        "-J %s" % ctx.genfiles_dir.path,
        "-J %s" % ctx.bin_dir.path] +
-      ["--ext-str '%s'='%s'"
-       % (var, ctx.expand_make_variables("vars", jsonnet_ext_strs[var],{})) for var in jsonnet_ext_strs.keys()] +
+      ["--ext-str %s=%s"
+       % (_quote(key), _quote(ctx.var[val])) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str '%s'"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
       ["--ext-code '%s'='%s'"
@@ -237,7 +244,7 @@ def _jsonnet_to_json_test_impl(ctx):
       ["-J %s" % im for im in depinfo.imports] +
       ["-J ."] +
       ["--ext-str %s=%s"
-       % (var, ctx.expand_make_variables("vars", jsonnet_ext_strs[var],{})) for var in jsonnet_ext_strs.keys()] +
+       % (_quote(key), _quote(ctx.var[val])) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str %s"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
       ["--ext-code %s=%s"
@@ -311,6 +318,7 @@ jsonnet_library = rule(
     attrs = dict(_jsonnet_library_attrs.items() +
                  _jsonnet_common_attrs.items()),
 )
+
 """Creates a logical set of Jsonnet files.
 
 Args:
@@ -379,6 +387,7 @@ jsonnet_to_json = rule(
                  _jsonnet_to_json_attrs.items() +
                  _jsonnet_common_attrs.items()),
 )
+
 """Compiles Jsonnet code to JSON.
 
 Args:
@@ -541,6 +550,7 @@ jsonnet_to_json_test = rule(
     executable = True,
     test = True,
 )
+
 """Compiles Jsonnet code to JSON and checks the output.
 
 Args:
