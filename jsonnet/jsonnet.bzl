@@ -45,6 +45,15 @@ _JSONNET_FILETYPE = [
     ".json",
 ]
 
+def _add_prefix_to_imports(label, imports):
+  imports_prefix = ""
+  if label.workspace_root:
+    imports_prefix += label.workspace_root + "/"
+  if label.package:
+    imports_prefix += label.package + "/"
+
+  return ["%s%s" % (imports_prefix, im) for im in imports]
+
 def _setup_deps(deps):
   """Collects source files and import flags of transitive dependencies.
 
@@ -62,7 +71,7 @@ def _setup_deps(deps):
   imports = depset()
   for dep in deps:
     transitive_sources += dep.transitive_jsonnet_files
-    imports += ["%s/%s" % (dep.label.package, im) for im in dep.imports]
+    imports += _add_prefix_to_imports(dep.label, dep.imports)
 
   return struct(
       transitive_sources = transitive_sources,
@@ -72,7 +81,7 @@ def _jsonnet_library_impl(ctx):
   """Implementation of the jsonnet_library rule."""
   depinfo = _setup_deps(ctx.attr.deps)
   sources = depinfo.transitive_sources + ctx.files.srcs
-  imports = depinfo.imports + ctx.attr.imports
+  imports = depinfo.imports + ctx.attr.imports + [src.dirname for src in ctx.files.srcs]
   transitive_data = depset()
   for dep in ctx.attr.deps:
     transitive_data += dep.data_runfiles.files
@@ -109,8 +118,7 @@ def _jsonnet_to_json_impl(ctx):
           "set -e;",
           toolchain.jsonnet_path,
       ] +
-      ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
-      ["-J %s" % im for im in depinfo.imports] +
+      ["-J %s" % im for im in depinfo.imports + _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
       ["-J .",
        "-J %s" % ctx.genfiles_dir.path,
        "-J %s" % ctx.bin_dir.path] +
@@ -240,8 +248,7 @@ def _jsonnet_to_json_test_impl(ctx):
   jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
   jsonnet_command = " ".join(
       ["OUTPUT=$(%s" % ctx.executable.jsonnet.short_path] +
-      ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
-      ["-J %s" % im for im in depinfo.imports] +
+      ["-J %s" % im for im in depinfo.imports + _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
       ["-J ."] +
       ["--ext-str %s=%s"
        % (_quote(key), _quote(ctx.var[val])) for key, val in jsonnet_ext_strs.items()] +

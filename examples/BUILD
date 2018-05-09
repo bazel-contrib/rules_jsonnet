@@ -109,3 +109,23 @@ genrule(
     testonly = 1,
     cmd = "echo {} > $@"
 )
+
+jsonnet_to_json(
+    name = "import",
+    src = "importer.jsonnet",
+    deps = [":import_lib"],
+    imports = ["importdir"],
+    outs = ["import.json"],
+)
+
+jsonnet_to_json_test(
+    name = "import_test",
+    src = "importer.jsonnet",
+    deps = [":import_lib"],
+    imports = ["importdir"]
+)
+
+jsonnet_library(
+    name = "import_lib",
+    srcs = ["importdir/import_me.jsonnet"],
+)
