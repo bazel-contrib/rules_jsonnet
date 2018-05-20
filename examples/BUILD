@@ -109,3 +109,10 @@ genrule(
     testonly = 1,
     cmd = "echo {} > $@"
 )
+
+jsonnet_to_json_test(
+    name = "yaml_stream_test",
+    src = "yaml_stream.jsonnet",
+    yaml_stream = 1,
+    golden = "yaml_stream_golden.yaml",
+)

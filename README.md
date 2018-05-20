@@ -129,7 +129,7 @@ jsonnet_library(
 ## jsonnet\_to\_json
 
 ```python
-jsonnet_to_json(name, src, deps, outs, multiple_outputs, imports, vars, code_vars)
+jsonnet_to_json(name, src, deps, outs, multiple_outputs, imports, vars, code_vars, yaml_stream)
 ```
 
 <table class="table table-condensed table-bordered table-params">
@@ -309,6 +309,15 @@ local foo = import "foo.jsonnet";
         </p>
       </td>
     </tr>
+    <tr>
+      <td><code>yaml_stream</code></td>
+      <td>
+        <code>bool, optional, default is False</code>
+        <p>
+          Set to 1 to write output as a YAML stream of JSON documents.
+        </p>
+      </td>
+    </tr>
   </tbody>
 </table>
 
@@ -418,7 +427,7 @@ jsonnet_to_json(
 ## jsonnet\_to\_json\_test
 
 ```python
-jsonnet_to_json_test(name, src, deps, imports, golden, error=0, regex=False)
+jsonnet_to_json_test(name, src, deps, imports, golden, error=0, regex=False, yaml_stream=False)
 ```
 
 <table class="table table-condensed table-bordered table-params">
@@ -577,6 +586,15 @@ jsonnet_to_json_test(name, src, deps, imports, golden, error=0, regex=False)
         <p>
           Set to 1 if <code>golden</code> contains a regex used to match
           the output of running <code>jsonnet</code> on <code>src</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>yaml_stream</code></td>
+      <td>
+        <code>bool, optional, default is False</code>
+        <p>
+          Set to 1 to write output as a YAML stream of JSON documents.
         </p>
       </td>
     </tr>

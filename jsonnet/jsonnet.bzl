@@ -104,6 +104,7 @@ def _jsonnet_to_json_impl(ctx):
   jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
   jsonnet_ext_code_files = ctx.attr.ext_code_files
   jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
+  yaml_stream_arg = ["-y"] if ctx.attr.yaml_stream else []
   command = (
       [
           "set -e;",
@@ -114,6 +115,7 @@ def _jsonnet_to_json_impl(ctx):
       ["-J .",
        "-J %s" % ctx.genfiles_dir.path,
        "-J %s" % ctx.bin_dir.path] +
+      yaml_stream_arg +
       ["--ext-str %s=%s"
        % (_quote(key), _quote(ctx.var[val])) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str '%s'"
@@ -215,7 +217,7 @@ def _jsonnet_to_json_test_impl(ctx):
     # Note that we only run jsonnet to canonicalize the golden output if the
     # expected return code is 0. Otherwise, the golden file contains the
     # expected error output.
-    dump_golden_cmd = (ctx.executable.jsonnet.short_path if ctx.attr.error == 0
+    dump_golden_cmd = (ctx.executable.jsonnet.short_path if ctx.attr.error == 0 and not ctx.attr.yaml_stream
                        else '/bin/cat')
     if ctx.attr.regex:
       diff_command = _REGEX_DIFF_COMMAND % (
@@ -238,11 +240,13 @@ def _jsonnet_to_json_test_impl(ctx):
   jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
   jsonnet_ext_code_files = ctx.attr.ext_code_files
   jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
+  yaml_stream_arg = ["-y"] if ctx.attr.yaml_stream else []
   jsonnet_command = " ".join(
       ["OUTPUT=$(%s" % ctx.executable.jsonnet.short_path] +
       ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
       ["-J %s" % im for im in depinfo.imports] +
       ["-J ."] +
+      yaml_stream_arg +
       ["--ext-str %s=%s"
        % (_quote(key), _quote(ctx.var[val])) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str %s"
@@ -379,6 +383,7 @@ _jsonnet_compile_attrs = {
 _jsonnet_to_json_attrs = {
     "outs": attr.output_list(mandatory = True),
     "multiple_outputs": attr.bool(),
+    "yaml_stream": attr.bool(default = False, mandatory = False),
 }
 
 jsonnet_to_json = rule(
@@ -540,6 +545,7 @@ _jsonnet_to_json_test_attrs = {
     ),
     "error": attr.int(),
     "regex": attr.bool(),
+    "yaml_stream": attr.bool(default = False, mandatory = False),
 }
 
 jsonnet_to_json_test = rule(
