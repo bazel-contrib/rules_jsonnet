@@ -47,7 +47,6 @@ def main():
           print ('WARNING: Duplicate value for key "%s": '
                  'using "%s"' % (key, value))
         format_args[key] = value
-
   with open(args.output, 'w') as f:
     f.write(args.format.format(**format_args))
 

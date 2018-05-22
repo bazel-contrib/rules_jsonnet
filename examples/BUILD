@@ -76,6 +76,10 @@ jsonnet_to_json(
     name = "files",
     src = "files.jsonnet",
     outs = ["files.json"],
+    ext_strs = {
+        "str": "sun",
+        "mydefine": "$(mydefine)",
+    },
     ext_str_envs = ["MYTEST"],
     ext_code_envs = ["MYJSONNET"],
     ext_str_files = [":file.txt"],
@@ -88,6 +92,10 @@ jsonnet_to_json_test(
     name = "files_test",
     size = "small",
     src = "files.jsonnet",
+    ext_strs = {
+        "str": "sun",
+        "mydefine": "$(mydefine)",
+    },
     ext_str_envs = ["MYTEST"],
     ext_code_envs = ["MYJSONNET"],
     ext_str_files = [":file.txt"],
@@ -115,19 +123,22 @@ jsonnet_to_json(
     src = "stamp.jsonnet",
     outs = ["stamp.json"],
     ext_strs = {
-      "k8s": "{STABLE_K8S_CLUSTER}"  
+      "k8s": "{STABLE_K8S_CLUSTER}",
+    },
+    ext_code = {
+      "complex": '{"key1": "value1"}',
     },
 )
 
-# jsonnet_to_json_test(
-#     name = "files_test",
-#     size = "small",
-#     src = "files.jsonnet",
-#     ext_str_envs = ["MYTEST"],
-#     ext_code_envs = ["MYJSONNET"],
-#     ext_str_files = [":file.txt"],
-#     ext_str_file_vars = ["test"],
-#     ext_code_files = [":codefile.libsonnet"],
-#     ext_code_file_vars = ["codefile"],
-#     golden = "files.out",
-# )
+jsonnet_to_json_test(
+    name = "stamp_test",
+    size = "small",
+    src = "stamp.jsonnet",
+    ext_strs = {
+      "k8s": "{STABLE_K8S_CLUSTER}",
+    },
+    ext_code = {
+      "complex": '{"key1": "value1"}',
+    },
+    golden = "stamp.out"
+)

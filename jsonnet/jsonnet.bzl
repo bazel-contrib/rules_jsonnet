@@ -92,16 +92,6 @@ def _jsonnet_toolchain(ctx):
 def _quote(s):
   return "'" + s.replace("'", "'\\''") + "'"
 
-def _get_runfile_path(ctx, f):
-    """Return the runfiles relative path of f."""
-    if ctx.workspace_name:
-        return ctx.workspace_name + "/" + f.short_path
-    else:
-        return f.short_path
-
-def _runfiles(ctx, f):
-  return "${RUNFILES}/%s" % _get_runfile_path(ctx, f)
-
 def _stamp_resolve(ctx, string, output):
   stamps = [ctx.info_file, ctx.version_file]
   stamp_args = [
@@ -119,40 +109,42 @@ def _stamp_resolve(ctx, string, output):
     mnemonic = "Stamp"
   )
 
+def _make_stamp_resolve(ext_vars, ctx, relative=True):
+  results = {}
+  stamp_inputs = []
+  for key, val in ext_vars.items():
+    # Check for make variables
+    if val[0:2] == "$(" and val[-1] == ")":
+      val = ctx.var[val[2:-1]]
+    # Check for stamp variables
+    elif val[0] == "{" and val[-1] == "}":
+      stamp_file = ctx.actions.declare_file(ctx.label.name + ".jsonnet_" + key)
+      _stamp_resolve(ctx, val, stamp_file)
+      if relative:
+        val = "$(cat %s)" % stamp_file.short_path
+      else:
+        val = "$(cat %s)" % stamp_file.path
+      stamp_inputs += [stamp_file]
+
+    results[key] = val
+
+  return results, stamp_inputs
+
+
 def _jsonnet_to_json_impl(ctx):
   """Implementation of the jsonnet_to_json rule."""
 
   depinfo = _setup_deps(ctx.attr.deps)
   toolchain = _jsonnet_toolchain(ctx)
-  jsonnet_ext_strs = {}
-  jsonnet_ext_strs = ctx.attr.ext_strs
-  jsonnet_ext_str_envs = ctx.attr.ext_str_envs
   jsonnet_ext_code = ctx.attr.ext_code
+  jsonnet_ext_str_envs = ctx.attr.ext_str_envs
   jsonnet_ext_code_envs = ctx.attr.ext_code_envs
   jsonnet_ext_str_files = ctx.attr.ext_str_files
   jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
   jsonnet_ext_code_files = ctx.attr.ext_code_files
   jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
-  files = []
 
-  # for key, val in ctx.attr.ext_strs.items():
-    # if "{" in val: 
-    #   stamp_file = ctx.new_file(ctx.label.name + ".jsonnet_ext_strs")
-    #   _stamp_resolve(ctx, val, stamp_file)
-    #   val = "$(cat %s)" % _runfiles(ctx, stamp_file)
-    #   files += [stamp_file]
-    
-    # jsonnet_ext_strs[key] = val
-  
-  # if "{" in jsonnet_ext_code: 
-  #   stamp_file = ctx.new_file(ctx.label.name + ".jsonnet_ext_code")
-  #   _stamp_resolve(ctx, ctx.attr.cluster, stamp_file)
-  #   cluster_arg = "$(cat %s)" % _runfiles(ctx, stamp_file)
-  #   files += [stamp_file]
-
-  print(jsonnet_ext_strs)
-  print('----------')
-  print(ctx.var)
+  jsonnet_ext_strs, stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, False)
 
   command = (
       [
@@ -165,12 +157,12 @@ def _jsonnet_to_json_impl(ctx):
        "-J %s" % ctx.genfiles_dir.path,
        "-J %s" % ctx.bin_dir.path] +
       ["--ext-str %s=%s"
-       % (_quote(key), _quote(ctx.var[val])) for key, val in jsonnet_ext_strs.items()] +
+       % (key, val) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str '%s'"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
-      ["--ext-code '%s'='%s'"
-       % (var, jsonnet_ext_code[var]) for var in jsonnet_ext_code.keys()] +
-      ["--ext-code '%s'"
+      ["--ext-code %s=%s"
+       % (key, _quote(val)) for key, val in jsonnet_ext_code.items()] +
+      ["--ext-code %s"
        % ext_code_env for ext_code_env in jsonnet_ext_code_envs] +
       ["--ext-str-file %s=%s"
        % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
@@ -213,7 +205,7 @@ def _jsonnet_to_json_impl(ctx):
       list(depinfo.transitive_sources))
 
   ctx.action(
-      inputs = compile_inputs,
+      inputs = compile_inputs + stamp_inputs,
       outputs = outputs,
       mnemonic = "Jsonnet",
       command = " ".join(command),
@@ -280,7 +272,6 @@ def _jsonnet_to_json_test_impl(ctx):
           ctx.label.name,
       )
 
-  jsonnet_ext_strs = ctx.attr.ext_strs
   jsonnet_ext_str_envs = ctx.attr.ext_str_envs
   jsonnet_ext_code = ctx.attr.ext_code
   jsonnet_ext_code_envs = ctx.attr.ext_code_envs
@@ -288,17 +279,20 @@ def _jsonnet_to_json_test_impl(ctx):
   jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
   jsonnet_ext_code_files = ctx.attr.ext_code_files
   jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
+
+  jsonnet_ext_strs, stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx)
+
   jsonnet_command = " ".join(
       ["OUTPUT=$(%s" % ctx.executable.jsonnet.short_path] +
       ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
       ["-J %s" % im for im in depinfo.imports] +
       ["-J ."] +
       ["--ext-str %s=%s"
-       % (_quote(key), _quote(ctx.var[val])) for key, val in jsonnet_ext_strs.items()] +
+       % (key, val) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str %s"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
       ["--ext-code %s=%s"
-       % (var, jsonnet_ext_code[var]) for var in jsonnet_ext_code.keys()] +
+       % (key, _quote(val)) for key, val in jsonnet_ext_code.items()] +
       ["--ext-code %s"
        % ext_code_env for ext_code_env in jsonnet_ext_code_envs] +
       ["--ext-str-file %s=%s"
@@ -332,7 +326,9 @@ def _jsonnet_to_json_test_impl(ctx):
       list(transitive_data) +
       list(depinfo.transitive_sources) +
       [list(jfile.files)[0] for jfile in jsonnet_ext_str_files] +
-      [list(jfile.files)[0] for jfile in jsonnet_ext_code_files])
+      [list(jfile.files)[0] for jfile in jsonnet_ext_code_files] +
+      stamp_inputs
+    )
 
   return struct(
       runfiles = ctx.runfiles(
@@ -356,12 +352,6 @@ _jsonnet_common_attrs = {
     "data": attr.label_list(
         allow_files = True,
         cfg = "data",
-    ),
-    "_stamper": attr.label(
-        default = Label("//jsonnet:stamper"),
-        cfg = "host",
-        executable = True,
-        allow_files = True,
     ),
 }
 
@@ -430,6 +420,12 @@ _jsonnet_compile_attrs = {
         allow_files = True,
     ),
     "ext_code_file_vars": attr.string_list(),
+    "_stamper": attr.label(
+        default = Label("//jsonnet:stamper"),
+        cfg = "host",
+        executable = True,
+        allow_files = True,
+    ),
 }
 
 _jsonnet_to_json_attrs = {
