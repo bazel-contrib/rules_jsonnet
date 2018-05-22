@@ -109,3 +109,25 @@ genrule(
     testonly = 1,
     cmd = "echo {} > $@"
 )
+
+jsonnet_to_json(
+    name = "stamp",
+    src = "stamp.jsonnet",
+    outs = ["stamp.json"],
+    ext_strs = {
+      "k8s": "{STABLE_K8S_CLUSTER}"  
+    },
+)
+
+# jsonnet_to_json_test(
+#     name = "files_test",
+#     size = "small",
+#     src = "files.jsonnet",
+#     ext_str_envs = ["MYTEST"],
+#     ext_code_envs = ["MYJSONNET"],
+#     ext_str_files = [":file.txt"],
+#     ext_str_file_vars = ["test"],
+#     ext_code_files = [":codefile.libsonnet"],
+#     ext_code_file_vars = ["codefile"],
+#     golden = "files.out",
+# )

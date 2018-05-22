@@ -92,10 +92,39 @@ def _jsonnet_toolchain(ctx):
 def _quote(s):
   return "'" + s.replace("'", "'\\''") + "'"
 
+def _get_runfile_path(ctx, f):
+    """Return the runfiles relative path of f."""
+    if ctx.workspace_name:
+        return ctx.workspace_name + "/" + f.short_path
+    else:
+        return f.short_path
+
+def _runfiles(ctx, f):
+  return "${RUNFILES}/%s" % _get_runfile_path(ctx, f)
+
+def _stamp_resolve(ctx, string, output):
+  stamps = [ctx.info_file, ctx.version_file]
+  stamp_args = [
+    "--stamp-info-file=%s" % sf.path
+    for sf in stamps
+  ]
+  ctx.action(
+    executable = ctx.executable._stamper,
+    arguments = [
+      "--format=%s" % string,
+      "--output=%s" % output.path,
+    ] + stamp_args,
+    inputs = [ctx.executable._stamper] + stamps,
+    outputs = [output],
+    mnemonic = "Stamp"
+  )
+
 def _jsonnet_to_json_impl(ctx):
   """Implementation of the jsonnet_to_json rule."""
+
   depinfo = _setup_deps(ctx.attr.deps)
   toolchain = _jsonnet_toolchain(ctx)
+  jsonnet_ext_strs = {}
   jsonnet_ext_strs = ctx.attr.ext_strs
   jsonnet_ext_str_envs = ctx.attr.ext_str_envs
   jsonnet_ext_code = ctx.attr.ext_code
@@ -104,6 +133,27 @@ def _jsonnet_to_json_impl(ctx):
   jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
   jsonnet_ext_code_files = ctx.attr.ext_code_files
   jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
+  files = []
+
+  # for key, val in ctx.attr.ext_strs.items():
+    # if "{" in val: 
+    #   stamp_file = ctx.new_file(ctx.label.name + ".jsonnet_ext_strs")
+    #   _stamp_resolve(ctx, val, stamp_file)
+    #   val = "$(cat %s)" % _runfiles(ctx, stamp_file)
+    #   files += [stamp_file]
+    
+    # jsonnet_ext_strs[key] = val
+  
+  # if "{" in jsonnet_ext_code: 
+  #   stamp_file = ctx.new_file(ctx.label.name + ".jsonnet_ext_code")
+  #   _stamp_resolve(ctx, ctx.attr.cluster, stamp_file)
+  #   cluster_arg = "$(cat %s)" % _runfiles(ctx, stamp_file)
+  #   files += [stamp_file]
+
+  print(jsonnet_ext_strs)
+  print('----------')
+  print(ctx.var)
+
   command = (
       [
           "set -e;",
@@ -306,6 +356,12 @@ _jsonnet_common_attrs = {
     "data": attr.label_list(
         allow_files = True,
         cfg = "data",
+    ),
+    "_stamper": attr.label(
+        default = Label("//jsonnet:stamper"),
+        cfg = "host",
+        executable = True,
+        allow_files = True,
     ),
 }
 
