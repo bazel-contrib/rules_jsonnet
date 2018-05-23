@@ -4,5 +4,5 @@ local complex = std.extVar("complex");
 {
   file1: "test",
   k8s: k8s,
-  complex: complex.key1,
+  complex: complex.nested,
 }

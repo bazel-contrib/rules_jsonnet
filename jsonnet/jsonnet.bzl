@@ -90,7 +90,7 @@ def _jsonnet_toolchain(ctx):
       jsonnet_path = ctx.executable.jsonnet.path)
 
 def _quote(s):
-  return "'" + s.replace("'", "'\\''") + "'"
+  return '"' + s.replace('"', '\\"') + '"'
 
 def _stamp_resolve(ctx, string, output):
   stamps = [ctx.info_file, ctx.version_file]
@@ -117,14 +117,17 @@ def _make_stamp_resolve(ext_vars, ctx, relative=True):
     if val[0:2] == "$(" and val[-1] == ")":
       val = ctx.var[val[2:-1]]
     # Check for stamp variables
-    elif val[0] == "{" and val[-1] == "}":
-      stamp_file = ctx.actions.declare_file(ctx.label.name + ".jsonnet_" + key)
-      _stamp_resolve(ctx, val, stamp_file)
-      if relative:
-        val = "$(cat %s)" % stamp_file.short_path
+    if ctx.attr.stamp:
+      if "{" in val and "}" in val:
+        stamp_file = ctx.actions.declare_file(ctx.label.name + ".jsonnet_" + key)
+        _stamp_resolve(ctx, val, stamp_file)
+        if relative:
+          val = '$(cat %s)' % stamp_file.short_path
+        else:
+          val = '$(cat %s)' % stamp_file.path
+        stamp_inputs += [stamp_file]
       else:
-        val = "$(cat %s)" % stamp_file.path
-      stamp_inputs += [stamp_file]
+        fail("Stamping request but no stamp variable to resolve.")
 
     results[key] = val
 
@@ -133,10 +136,8 @@ def _make_stamp_resolve(ext_vars, ctx, relative=True):
 
 def _jsonnet_to_json_impl(ctx):
   """Implementation of the jsonnet_to_json rule."""
-
   depinfo = _setup_deps(ctx.attr.deps)
   toolchain = _jsonnet_toolchain(ctx)
-  jsonnet_ext_code = ctx.attr.ext_code
   jsonnet_ext_str_envs = ctx.attr.ext_str_envs
   jsonnet_ext_code_envs = ctx.attr.ext_code_envs
   jsonnet_ext_str_files = ctx.attr.ext_str_files
@@ -144,7 +145,9 @@ def _jsonnet_to_json_impl(ctx):
   jsonnet_ext_code_files = ctx.attr.ext_code_files
   jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
 
-  jsonnet_ext_strs, stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, False)
+  jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, False)
+  jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, False)
+  stamp_inputs = strs_stamp_inputs + code_stamp_inputs
 
   command = (
       [
@@ -157,7 +160,7 @@ def _jsonnet_to_json_impl(ctx):
        "-J %s" % ctx.genfiles_dir.path,
        "-J %s" % ctx.bin_dir.path] +
       ["--ext-str %s=%s"
-       % (key, val) for key, val in jsonnet_ext_strs.items()] +
+       % (key, _quote(val)) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str '%s'"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
       ["--ext-code %s=%s"
@@ -273,14 +276,15 @@ def _jsonnet_to_json_test_impl(ctx):
       )
 
   jsonnet_ext_str_envs = ctx.attr.ext_str_envs
-  jsonnet_ext_code = ctx.attr.ext_code
   jsonnet_ext_code_envs = ctx.attr.ext_code_envs
   jsonnet_ext_str_files = ctx.attr.ext_str_files
   jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
   jsonnet_ext_code_files = ctx.attr.ext_code_files
   jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
 
-  jsonnet_ext_strs, stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx)
+  jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, True)
+  jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, True)
+  stamp_inputs = strs_stamp_inputs + code_stamp_inputs
 
   jsonnet_command = " ".join(
       ["OUTPUT=$(%s" % ctx.executable.jsonnet.short_path] +
@@ -288,7 +292,7 @@ def _jsonnet_to_json_test_impl(ctx):
       ["-J %s" % im for im in depinfo.imports] +
       ["-J ."] +
       ["--ext-str %s=%s"
-       % (key, val) for key, val in jsonnet_ext_strs.items()] +
+       % (key, _quote(val)) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str %s"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
       ["--ext-code %s=%s"
@@ -420,6 +424,10 @@ _jsonnet_compile_attrs = {
         allow_files = True,
     ),
     "ext_code_file_vars": attr.string_list(),
+    "stamp": attr.bool(
+        default = False,
+        mandatory = False,
+    ),
     "_stamper": attr.label(
         default = Label("//jsonnet:stamper"),
         cfg = "host",

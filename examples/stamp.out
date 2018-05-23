@@ -1,5 +1,5 @@
 {
   "file1": "test",
   "k8s": "MyCluster",
-  "complex": "value1",
+  "complex": { "secret": "top" },
 }

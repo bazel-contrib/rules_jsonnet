@@ -80,6 +80,9 @@ jsonnet_to_json(
         "str": "sun",
         "mydefine": "$(mydefine)",
     },
+    ext_code = {
+      "complex": '{"key1": "value1"}',
+    },
     ext_str_envs = ["MYTEST"],
     ext_code_envs = ["MYJSONNET"],
     ext_str_files = [":file.txt"],
@@ -95,6 +98,9 @@ jsonnet_to_json_test(
     ext_strs = {
         "str": "sun",
         "mydefine": "$(mydefine)",
+    },
+    ext_code = {
+      "complex": '{"key1": "value1"}',
     },
     ext_str_envs = ["MYTEST"],
     ext_code_envs = ["MYJSONNET"],
@@ -126,8 +132,9 @@ jsonnet_to_json(
       "k8s": "{STABLE_K8S_CLUSTER}",
     },
     ext_code = {
-      "complex": '{"key1": "value1"}',
+      "complex": "{COMPLEX_JSON}",
     },
+    stamp = True,
 )
 
 jsonnet_to_json_test(
@@ -138,7 +145,8 @@ jsonnet_to_json_test(
       "k8s": "{STABLE_K8S_CLUSTER}",
     },
     ext_code = {
-      "complex": '{"key1": "value1"}',
+      "complex": "{COMPLEX_JSON}",
     },
+    stamp = True,
     golden = "stamp.out"
 )

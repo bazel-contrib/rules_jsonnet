@@ -4,6 +4,7 @@ local my_test = std.extVar("MYTEST");
 local my_jsonnet = std.extVar("MYJSONNET");
 local str = std.extVar("str");
 local mydefine = std.extVar("mydefine");
+local complex = std.extVar("complex");
 
 {
   str: str,
@@ -12,4 +13,5 @@ local mydefine = std.extVar("mydefine");
   file2: codefile.weather,
   my_test: my_test,
   my_jsonnet: my_jsonnet.code,
+  complex: complex.key1,
 }
