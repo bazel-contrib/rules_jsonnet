@@ -232,17 +232,16 @@ local foo = import "foo.jsonnet";
         </p>
       </td>
     </tr>
-        <tr>
+    <tr>
       <td><code>stamp</code></td>
       <td>
-        <code>bool, optional, default `False`</code>
+        <code>bool, optional, default False</code>
         <p>
           Set to `True` to explicitly enable stamping for `ext_strs` and `ext_code`
         </p>
         <p>
           To get outside variables provided by a script invoked via `--workspace_status_command` into the build. For example:
         </p>
-        <p>
 <pre>
 jsonnet_to_json(
   name = "...",
@@ -252,7 +251,17 @@ jsonnet_to_json(
   stamp = True
 )
 </pre>
-        </p>
+<pre>
+$ cat .bazelrc
+build --workspace_status_command=./print-workspace-status.sh
+
+$ cat print-workspace-status.sh
+cat &lt;&lt;EOF
+VAR1 value1
+# This can be overriden by users if they "export CLUSTER_OVERRIDE"
+CLUSTER ${CLUSTER_OVERRIDE:-default-value2}
+EOF
+
       </td>
     </tr>
     <tr>
@@ -442,7 +451,7 @@ jsonnet_to_json(
 ## jsonnet\_to\_json\_test
 
 ```python
-jsonnet_to_json_test(name, src, deps, imports, golden, error=0, regex=False)
+jsonnet_to_json_test(name, src, deps, imports, golden, error=0, regex=False, stamp, ext_strs, ext_str_envs, ext_code, ext_code_envs ext_str_files, ext_str_file_vars, ext_code_files, ext_code_file_vars)
 ```
 
 <table class="table table-condensed table-bordered table-params">
@@ -493,6 +502,18 @@ jsonnet_to_json_test(name, src, deps, imports, golden, error=0, regex=False)
         <p>
           List of import <code>-J</code> flags to be passed to the
           <code>jsonnet</code> compiler.
+        </p>
+      </td>
+    </tr>
+        <tr>
+      <td><code>stamp</code></td>
+      <td>
+        <code>bool, optional, default False</code>
+        <p>
+          Set to `True` to explicitly enable stamping for `ext_strs` and `ext_code`
+        </p>
+        <p>
+          To get outside variables provided by a script invoked via `--workspace_status_command` into the build.
         </p>
       </td>
     </tr>
