@@ -129,7 +129,7 @@ jsonnet_library(
 ## jsonnet\_to\_json
 
 ```python
-jsonnet_to_json(name, src, deps, outs, multiple_outputs, imports, vars, code_vars)
+jsonnet_to_json(name, src, deps, outs, multiple_outputs, imports, stamp, ext_strs, ext_str_envs, ext_code, ext_code_envs ext_str_files, ext_str_file_vars, ext_code_files, ext_code_file_vars)
 ```
 
 <table class="table table-condensed table-bordered table-params">
@@ -211,6 +211,7 @@ jsonnet_to_json(name, src, deps, outs, multiple_outputs, imports, vars, code_var
           This is used for the case where multiple file output is used but only
           for generating a single output file. For example:
         </p>
+        <p>
 <pre>
 local foo = import "foo.jsonnet";
 
@@ -228,6 +229,29 @@ local foo = import "foo.jsonnet";
         <p>
           List of import <code>-J</code> flags to be passed to the
           <code>jsonnet</code> compiler.
+        </p>
+      </td>
+    </tr>
+        <tr>
+      <td><code>stamp</code></td>
+      <td>
+        <code>bool, optional, default `False`</code>
+        <p>
+          Set to `True` to explicitly enable stamping for `ext_strs` and `ext_code`
+        </p>
+        <p>
+          To get outside variables provided by a script invoked via `--workspace_status_command` into the build. For example:
+        </p>
+        <p>
+<pre>
+jsonnet_to_json(
+  name = "...",
+  ext_strs = {
+    cluster = "{CLUSTER}"
+  },
+  stamp = True
+)
+</pre>
         </p>
       </td>
     </tr>
