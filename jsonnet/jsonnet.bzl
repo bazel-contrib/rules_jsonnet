@@ -113,9 +113,11 @@ def _jsonnet_to_json_impl(ctx):
       ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
       ["-J %s" % im for im in depinfo.imports] +
       ["-J .",
+       "-J %s/%s" % (ctx.genfiles_dir.path, ctx.label.package),
        "-J %s" % ctx.genfiles_dir.path,
+       "-J %s/%s" % (ctx.bin_dir.path, ctx.label.package),
        "-J %s" % ctx.bin_dir.path] +
-      yaml_stream_arg +
+       yaml_stream_arg +
       ["--ext-str %s=%s"
        % (_quote(key), _quote(ctx.var[val])) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str '%s'"
