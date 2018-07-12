@@ -92,6 +92,12 @@ def _jsonnet_toolchain(ctx):
 def _quote(s):
   return "'" + s.replace("'", "'\\''") + "'"
 
+def _make_resolve(ctx, val):
+    if val[0:2] == "$(" and val[-1] == ")":
+        return ctx.var[val[2:-1]]
+    else:
+        return val
+
 def _jsonnet_to_json_impl(ctx):
   """Implementation of the jsonnet_to_json rule."""
   depinfo = _setup_deps(ctx.attr.deps)
@@ -117,7 +123,7 @@ def _jsonnet_to_json_impl(ctx):
        "-J %s" % ctx.bin_dir.path] +
       yaml_stream_arg +
       ["--ext-str %s=%s"
-       % (_quote(key), _quote(ctx.var[val])) for key, val in jsonnet_ext_strs.items()] +
+       % (_quote(key), _quote(_make_resolve(ctx, val))) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str '%s'"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
       ["--ext-code '%s'='%s'"
@@ -248,7 +254,7 @@ def _jsonnet_to_json_test_impl(ctx):
       ["-J ."] +
       yaml_stream_arg +
       ["--ext-str %s=%s"
-       % (_quote(key), _quote(ctx.var[val])) for key, val in jsonnet_ext_strs.items()] +
+       % (_quote(key), _quote(_make_resolve(ctx, val))) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str %s"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
       ["--ext-code %s=%s"

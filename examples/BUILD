@@ -76,6 +76,10 @@ jsonnet_to_json(
     name = "files",
     src = "files.jsonnet",
     outs = ["files.json"],
+    ext_strs = {
+        "str": "sun",
+        "mydefine": "$(mydefine)",
+    },
     ext_str_envs = ["MYTEST"],
     ext_code_envs = ["MYJSONNET"],
     ext_str_files = [":file.txt"],
@@ -88,6 +92,10 @@ jsonnet_to_json_test(
     name = "files_test",
     size = "small",
     src = "files.jsonnet",
+    ext_strs = {
+        "str": "sun",
+        "mydefine": "$(mydefine)",
+    },
     ext_str_envs = ["MYTEST"],
     ext_code_envs = ["MYJSONNET"],
     ext_str_files = [":file.txt"],
