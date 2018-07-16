@@ -135,8 +135,9 @@ jsonnet_to_json(
     },
     ext_code = {
       "complex": "{COMPLEX_JSON}",
+      "my_json": "{test: 'something'}",
     },
-    stamp = True,
+    stamp_vars = ["complex", "k8s"],
 )
 
 jsonnet_to_json_test(
@@ -150,8 +151,9 @@ jsonnet_to_json_test(
     },
     ext_code = {
       "complex": "{COMPLEX_JSON}",
+      "my_json": "{test: 'something'}",
     },
-    stamp = True,
+    stamp_vars = ["k8s", "complex"],
     golden = "stamp.out"
 )
 

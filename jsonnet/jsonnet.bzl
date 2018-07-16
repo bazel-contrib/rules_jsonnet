@@ -118,8 +118,8 @@ def _make_stamp_resolve(ext_vars, ctx, relative=True):
     if val[0:2] == "$(" and val[-1] == ")":
       val = ctx.var[val[2:-1]]
     # Check for stamp variables
-    if ctx.attr.stamp:
-      if "{" in val and "}" in val:
+    if ctx.attr.stamp_vars:
+      if key in ctx.attr.stamp_vars:
         stamp_file = ctx.actions.declare_file(ctx.label.name + ".jsonnet_" + key)
         _stamp_resolve(ctx, val, stamp_file)
         if relative:
@@ -130,9 +130,9 @@ def _make_stamp_resolve(ext_vars, ctx, relative=True):
         has_stamped = True
 
     results[key] = val
-
-  if ctx.attr.stamp and not has_stamped:
-    fail("Stamping requested but found no stamp variable to resolve for.")
+  
+#   if ctx.attr.stamp_vars and not has_stamped:
+#     fail("Stamping requested but found no stamp variable to resolve for.")
 
   return results, stamp_inputs
 
@@ -430,8 +430,8 @@ _jsonnet_compile_attrs = {
         allow_files = True,
     ),
     "ext_code_file_vars": attr.string_list(),
-    "stamp": attr.bool(
-        default = False,
+    "stamp_vars": attr.string_list(
+        default = [],
         mandatory = False,
     ),
     "_stamper": attr.label(

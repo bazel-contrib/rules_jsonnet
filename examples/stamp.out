@@ -4,4 +4,5 @@
   "non_stamp": "non_stamp",
   "k8s": "MyCluster",
   "complex": { "secret": "top" },
+  "my_json": { "test": "something" }
 }
