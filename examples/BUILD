@@ -150,3 +150,10 @@ jsonnet_to_json_test(
     stamp = True,
     golden = "stamp.out"
 )
+
+jsonnet_to_json_test(
+    name = "yaml_stream_test",
+    src = "yaml_stream.jsonnet",
+    yaml_stream = 1,
+    golden = "yaml_stream_golden.yaml",
+)
