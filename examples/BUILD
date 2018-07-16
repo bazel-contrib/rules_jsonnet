@@ -129,6 +129,8 @@ jsonnet_to_json(
     src = "stamp.jsonnet",
     outs = ["stamp.json"],
     ext_strs = {
+      "non_stamp": "non_stamp",
+      "mydefine": "$(mydefine)",
       "k8s": "{STABLE_K8S_CLUSTER}",
     },
     ext_code = {
@@ -142,6 +144,8 @@ jsonnet_to_json_test(
     size = "small",
     src = "stamp.jsonnet",
     ext_strs = {
+      "non_stamp": "non_stamp",
+      "mydefine": "$(mydefine)",
       "k8s": "{STABLE_K8S_CLUSTER}",
     },
     ext_code = {

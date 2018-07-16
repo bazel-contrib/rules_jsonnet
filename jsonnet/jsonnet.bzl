@@ -111,6 +111,7 @@ def _stamp_resolve(ctx, string, output):
 
 def _make_stamp_resolve(ext_vars, ctx, relative=True):
   results = {}
+  has_stamped = False
   stamp_inputs = []
   for key, val in ext_vars.items():
     # Check for make variables
@@ -126,10 +127,12 @@ def _make_stamp_resolve(ext_vars, ctx, relative=True):
         else:
           val = '$(cat %s)' % stamp_file.path
         stamp_inputs += [stamp_file]
-      else:
-        fail("Stamping request but no stamp variable to resolve.")
+        has_stamped = True
 
     results[key] = val
+
+  if ctx.attr.stamp and not has_stamped:
+    fail("Stamping requested but found no stamp variable to resolve for.")
 
   return results, stamp_inputs
 
