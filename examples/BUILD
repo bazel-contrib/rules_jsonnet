@@ -77,7 +77,7 @@ jsonnet_to_json(
     src = "files.jsonnet",
     outs = ["files.json"],
     ext_strs = {
-        "str": "sun",
+        "str's": "sun",
         "mydefine": "$(mydefine)",
     },
     ext_code = {
@@ -96,7 +96,7 @@ jsonnet_to_json_test(
     size = "small",
     src = "files.jsonnet",
     ext_strs = {
-        "str": "sun",
+        "str's": "sun",
         "mydefine": "$(mydefine)",
     },
     ext_code = {
@@ -137,7 +137,7 @@ jsonnet_to_json(
       "complex": "{COMPLEX_JSON}",
       "my_json": "{test: 'something'}",
     },
-    stamp_vars = ["complex", "k8s"],
+    stamp_keys = ["complex", "k8s"],
 )
 
 jsonnet_to_json_test(
@@ -153,7 +153,7 @@ jsonnet_to_json_test(
       "complex": "{COMPLEX_JSON}",
       "my_json": "{test: 'something'}",
     },
-    stamp_vars = ["k8s", "complex"],
+    stamp_keys = ["k8s", "complex"],
     golden = "stamp.out"
 )
 

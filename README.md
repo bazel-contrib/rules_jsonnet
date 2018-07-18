@@ -129,7 +129,7 @@ jsonnet_library(
 ## jsonnet\_to\_json
 
 ```python
-jsonnet_to_json(name, src, deps, outs, multiple_outputs, imports, stamp, ext_strs, ext_str_envs, ext_code, ext_code_envs ext_str_files, ext_str_file_vars, ext_code_files, ext_code_file_vars, yaml_stream)
+jsonnet_to_json(name, src, deps, outs, multiple_outputs, imports, stamp_keys, ext_strs, ext_str_envs, ext_code, ext_code_envs ext_str_files, ext_str_file_vars, ext_code_files, ext_code_file_vars, yaml_stream)
 ```
 
 <table class="table table-condensed table-bordered table-params">
@@ -233,11 +233,11 @@ local foo = import "foo.jsonnet";
       </td>
     </tr>
     <tr>
-      <td><code>stamp</code></td>
+      <td><code>stamp_keys</code></td>
       <td>
-        <code>bool, optional, default False</code>
+        <code>List of strings, optional</code>
         <p>
-          Set to `True` to explicitly enable stamping for `ext_strs` and `ext_code`
+          Specify which variables in `ext_strs` and `ext_code` should get stamped by listing the matching dict keys.
         </p>
         <p>
           To get outside variables provided by a script invoked via `--workspace_status_command` into the build. For example:
@@ -248,7 +248,7 @@ jsonnet_to_json(
   ext_strs = {
     cluster = "{CLUSTER}"
   },
-  stamp = True
+  stamp_keys = ["cluster"]
 )
 </pre>
 <pre>
@@ -460,7 +460,7 @@ jsonnet_to_json(
 ## jsonnet\_to\_json\_test
 
 ```python
-jsonnet_to_json_test(name, src, deps, imports, golden, error=0, regex=False, yaml_stream=False, stamp, ext_strs, ext_str_envs, ext_code, ext_code_envs ext_str_files, ext_str_file_vars, ext_code_files, ext_code_file_vars)
+jsonnet_to_json_test(name, src, deps, imports, golden, error=0, regex=False, yaml_stream=False, stamp_keys, ext_strs, ext_str_envs, ext_code, ext_code_envs ext_str_files, ext_str_file_vars, ext_code_files, ext_code_file_vars)
 ```
 
 <table class="table table-condensed table-bordered table-params">
@@ -515,11 +515,11 @@ jsonnet_to_json_test(name, src, deps, imports, golden, error=0, regex=False, yam
       </td>
     </tr>
         <tr>
-      <td><code>stamp</code></td>
+      <td><code>stamp_keys</code></td>
       <td>
-        <code>bool, optional, default False</code>
+        <code>List of strings, optional</code>
         <p>
-          Set to `True` to explicitly enable stamping for `ext_strs` and `ext_code`
+          Specify which variables in `ext_strs` and `ext_code` should get stamped by listing the matching dict keys.
         </p>
         <p>
           To get outside variables provided by a script invoked via `--workspace_status_command` into the build.

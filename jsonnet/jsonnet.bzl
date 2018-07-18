@@ -111,15 +111,14 @@ def _stamp_resolve(ctx, string, output):
 
 def _make_stamp_resolve(ext_vars, ctx, relative=True):
   results = {}
-  has_stamped = False
   stamp_inputs = []
   for key, val in ext_vars.items():
     # Check for make variables
     if val[0:2] == "$(" and val[-1] == ")":
       val = ctx.var[val[2:-1]]
     # Check for stamp variables
-    if ctx.attr.stamp_vars:
-      if key in ctx.attr.stamp_vars:
+    if ctx.attr.stamp_keys:
+      if key in ctx.attr.stamp_keys:
         stamp_file = ctx.actions.declare_file(ctx.label.name + ".jsonnet_" + key)
         _stamp_resolve(ctx, val, stamp_file)
         if relative:
@@ -127,12 +126,8 @@ def _make_stamp_resolve(ext_vars, ctx, relative=True):
         else:
           val = '$(cat %s)' % stamp_file.path
         stamp_inputs += [stamp_file]
-        has_stamped = True
 
     results[key] = val
-  
-#   if ctx.attr.stamp_vars and not has_stamped:
-#     fail("Stamping requested but found no stamp variable to resolve for.")
 
   return results, stamp_inputs
 
@@ -152,6 +147,9 @@ def _jsonnet_to_json_impl(ctx):
   jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, False)
   stamp_inputs = strs_stamp_inputs + code_stamp_inputs
 
+  if ctx.attr.stamp_keys and not stamp_inputs:
+    fail("Stamping requested but found no stamp variable to resolve for.")
+
   yaml_stream_arg = ["-y"] if ctx.attr.yaml_stream else []
   command = (
       [
@@ -165,11 +163,11 @@ def _jsonnet_to_json_impl(ctx):
        "-J %s" % ctx.bin_dir.path] +
       yaml_stream_arg +
       ["--ext-str %s=%s"
-       % (key, _quote(val)) for key, val in jsonnet_ext_strs.items()] +
+       % (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str '%s'"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
       ["--ext-code %s=%s"
-       % (key, _quote(val)) for key, val in jsonnet_ext_code.items()] +
+       % (_quote(key), _quote(val)) for key, val in jsonnet_ext_code.items()] +
       ["--ext-code %s"
        % ext_code_env for ext_code_env in jsonnet_ext_code_envs] +
       ["--ext-str-file %s=%s"
@@ -299,11 +297,11 @@ def _jsonnet_to_json_test_impl(ctx):
       ["-J ."] +
       yaml_stream_arg +
       ["--ext-str %s=%s"
-       % (key, _quote(val)) for key, val in jsonnet_ext_strs.items()] +
+       % (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str %s"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
       ["--ext-code %s=%s"
-       % (key, _quote(val)) for key, val in jsonnet_ext_code.items()] +
+       % (_quote(key), _quote(val)) for key, val in jsonnet_ext_code.items()] +
       ["--ext-code %s"
        % ext_code_env for ext_code_env in jsonnet_ext_code_envs] +
       ["--ext-str-file %s=%s"
@@ -430,7 +428,7 @@ _jsonnet_compile_attrs = {
         allow_files = True,
     ),
     "ext_code_file_vars": attr.string_list(),
-    "stamp_vars": attr.string_list(
+    "stamp_keys": attr.string_list(
         default = [],
         mandatory = False,
     ),
