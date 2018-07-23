@@ -1,0 +1,103 @@
+{
+   "intersection-workflow.json": {
+      "intersection": {
+         "jobs": {
+            "intersect": {
+               "command": "comm -12 /tmp/list1_sorted /tmp/list2_sorted > /tmp/intersection",
+               "deps": [
+                  ":sort_file1",
+                  ":sort_file2"
+               ],
+               "inputs": [
+                  "/tmp/list1_sorted",
+                  "/tmp/list2_sorted"
+               ],
+               "outputs": [
+                  "/tmp/intersection"
+               ],
+               "type": "sh",
+               "vars": { }
+            },
+            "sort_file1": {
+               "command": "sort /tmp/list1 > /tmp/list1_sorted",
+               "deps": [ ],
+               "inputs": [
+                  "/tmp/list1"
+               ],
+               "outputs": [
+                  "/tmp/list1_sorted"
+               ],
+               "type": "sh",
+               "vars": { }
+            },
+            "sort_file2": {
+               "command": "sort /tmp/list2 > /tmp/list2_sorted",
+               "deps": [ ],
+               "inputs": [
+                  "/tmp/list2"
+               ],
+               "outputs": [
+                  "/tmp/list2_sorted"
+               ],
+               "type": "sh",
+               "vars": { }
+            }
+         },
+         "retries": 5,
+         "schedule": { }
+      }
+   },
+   "wordcount-workflow.json": {
+      "wordcount": {
+         "jobs": {
+            "count": {
+               "command": "uniq -c /tmp/sorted_tokens > /tmp/counts",
+               "deps": [
+                  ":sort"
+               ],
+               "inputs": [
+                  "/tmp/sorted_tokens"
+               ],
+               "outputs": [
+                  "/tmp/counts"
+               ],
+               "type": "sh",
+               "vars": { }
+            },
+            "sort": {
+               "command": "sort /tmp/tokens > /tmp/sorted_tokens",
+               "deps": [
+                  ":tokenize"
+               ],
+               "inputs": [
+                  "/tmp/tokens"
+               ],
+               "outputs": [
+                  "/tmp/sorted_tokens"
+               ],
+               "type": "sh",
+               "vars": { }
+            },
+            "tokenize": {
+               "command": "tr ' ' '\n' < /tmp/passage_test > /tmp/tokens",
+               "deps": [ ],
+               "inputs": [
+                  "/tmp/passage_test"
+               ],
+               "outputs": [
+                  "/tmp/tokens"
+               ],
+               "type": "sh",
+               "vars": { }
+            }
+         },
+         "retries": 12,
+         "schedule": {
+            "repeat_frequency": 1,
+            "repeat_type": "week",
+            "start_date": "2015-11-15",
+            "start_time": "17:30"
+         }
+      }
+   }
+}
