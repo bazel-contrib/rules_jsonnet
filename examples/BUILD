@@ -60,20 +60,34 @@ jsonnet_to_json_test(
 )
 
 jsonnet_to_json_test(
-    name = "files_test",
+    name = "extvar_env_test",
     size = "small",
-    src = "files.jsonnet",
+    src = "extvar_env.jsonnet",
     ext_code_envs = ["MYJSONNET"],
-    ext_code_file_vars = ["codefile"],
-    ext_code_files = [":codefile.libsonnet"],
     ext_str_envs = ["MYTEST"],
-    ext_str_file_vars = ["test"],
-    ext_str_files = [":file.txt"],
+    golden = "extvar_env_golden.json",
+)
+
+jsonnet_to_json_test(
+    name = "extvar_str_test",
+    size = "small",
+    src = "extvar_str.jsonnet",
     ext_strs = {
         "str": "sun",
         "mydefine": "$(mydefine)",
     },
-    golden = "files.out",
+    golden = "extvar_str_golden.json",
+)
+
+jsonnet_to_json_test(
+    name = "extvar_files_test",
+    size = "small",
+    src = "extvar_files.jsonnet",
+    ext_code_file_vars = ["codefile"],
+    ext_code_files = [":codefile.libsonnet"],
+    ext_str_file_vars = ["test"],
+    ext_str_files = [":file.txt"],
+    golden = "extvar_files_golden.json",
 )
 
 jsonnet_to_json_test(
