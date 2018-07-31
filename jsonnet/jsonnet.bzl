@@ -109,13 +109,18 @@ def _stamp_resolve(ctx, string, output):
     mnemonic = "Stamp"
   )
 
+def _make_resolve(ctx, val):
+    if val[0:2] == "$(" and val[-1] == ")":
+        return ctx.var[val[2:-1]]
+    else:
+        return val
+
 def _make_stamp_resolve(ext_vars, ctx, relative=True):
   results = {}
   stamp_inputs = []
   for key, val in ext_vars.items():
     # Check for make variables
-    if val[0:2] == "$(" and val[-1] == ")":
-      val = ctx.var[val[2:-1]]
+    val = _make_resolve(ctx, val)
     # Check for stamp variables
     if ctx.attr.stamp_keys:
       if key in ctx.attr.stamp_keys:
@@ -130,13 +135,6 @@ def _make_stamp_resolve(ext_vars, ctx, relative=True):
     results[key] = val
 
   return results, stamp_inputs
-
-
-def _make_resolve(ctx, val):
-    if val[0:2] == "$(" and val[-1] == ")":
-        return ctx.var[val[2:-1]]
-    else:
-        return val
 
 def _jsonnet_to_json_impl(ctx):
   """Implementation of the jsonnet_to_json rule."""
@@ -170,7 +168,6 @@ def _jsonnet_to_json_impl(ctx):
       yaml_stream_arg +
       ["--ext-str %s=%s"
        % (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
-    #    % (_quote(key), _quote(_make_resolve(ctx, val))) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str '%s'"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
       ["--ext-code %s=%s"
@@ -305,7 +302,6 @@ def _jsonnet_to_json_test_impl(ctx):
       yaml_stream_arg +
       ["--ext-str %s=%s"
        % (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
-    #    % (_quote(key), _quote(_make_resolve(ctx, val))) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str %s"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
       ["--ext-code %s=%s"
