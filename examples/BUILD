@@ -106,7 +106,7 @@ genrule(
 jsonnet_to_json_test(
     name = "extvar_stamp_test",
     size = "small",
-    src = "stamp.jsonnet",
+    src = "extvar_stamp.jsonnet",
     ext_strs = {
       "non_stamp": "non_stamp",
       "mydefine": "$(mydefine)",
@@ -117,7 +117,7 @@ jsonnet_to_json_test(
       "my_json": "{test: 'something'}",
     },
     stamp_keys = ["k8s", "complex"],
-    golden = "stamp.out"
+    golden = "extvar_stamp_golden.json"
 )
 
 jsonnet_to_json_test(
