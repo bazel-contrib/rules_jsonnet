@@ -311,7 +311,7 @@ _jsonnet_common_attrs = {
         default = Label("@jsonnet//cmd:jsonnet"),
         cfg = "host",
         executable = True,
-        single_file = True,
+        allow_single_file = True,
     ),
     "data": attr.label_list(
         allow_files = True,
@@ -367,10 +367,7 @@ Example:
 """
 
 _jsonnet_compile_attrs = {
-    "src": attr.label(
-        allow_files = _JSONNET_FILETYPE,
-        single_file = True,
-    ),
+    "src": attr.label(allow_single_file = _JSONNET_FILETYPE),
     "ext_strs": attr.string_dict(),
     "ext_str_envs": attr.string_list(),
     "ext_code": attr.string_dict(),
@@ -544,10 +541,7 @@ Example:
 """
 
 _jsonnet_to_json_test_attrs = {
-    "golden": attr.label(
-        allow_files = True,
-        single_file = True,
-    ),
+    "golden": attr.label(allow_single_file = True),
     "error": attr.int(),
     "regex": attr.bool(),
     "yaml_stream": attr.bool(default = False, mandatory = False),
