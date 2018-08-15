@@ -168,12 +168,15 @@ def _jsonnet_to_json_impl(ctx):
   )
 
   compile_inputs = (
-      [ctx.file.src, ctx.executable.jsonnet] +
+      [ctx.file.src] +
       runfiles.files.to_list() +
       depinfo.transitive_sources.to_list())
 
-  ctx.action(
+  tools = [ctx.executable.jsonnet]
+
+  ctx.actions.run_shell(
       inputs = compile_inputs,
+      tools = tools,
       outputs = outputs,
       mnemonic = "Jsonnet",
       command = " ".join(command),
