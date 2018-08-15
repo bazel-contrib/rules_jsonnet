@@ -119,7 +119,7 @@ def _jsonnet_to_json_impl(ctx):
           toolchain.jsonnet_path,
       ] +
       ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
-      ["-J %s" % im for im in depinfo.imports] +
+      ["-J %s" % im for im in depinfo.imports.to_list()] +
       ["-J .",
        "-J %s" % ctx.genfiles_dir.path,
        "-J %s" % ctx.bin_dir.path] +
@@ -169,8 +169,8 @@ def _jsonnet_to_json_impl(ctx):
 
   compile_inputs = (
       [ctx.file.src, ctx.executable.jsonnet] +
-      list(runfiles.files) +
-      list(depinfo.transitive_sources))
+      runfiles.files.to_list() +
+      depinfo.transitive_sources.to_list())
 
   ctx.action(
       inputs = compile_inputs,
