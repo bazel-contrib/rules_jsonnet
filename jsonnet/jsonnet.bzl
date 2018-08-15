@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 """Jsonnet Rules
 
 These are build rules for working with [Jsonnet][jsonnet] files with Bazel.
@@ -675,7 +677,7 @@ Example:
 
 def jsonnet_repositories():
   """Adds the external dependencies needed for the Jsonnet rules."""
-  native.http_archive(
+  http_archive(
       name = "jsonnet",
       urls = [
           "https://mirror.bazel.build/github.com/google/jsonnet/archive/v0.10.0.tar.gz",
