@@ -100,11 +100,17 @@ def _make_resolve(ctx, val):
 
 def _jsonnet_to_json_impl(ctx):
   """Implementation of the jsonnet_to_json rule."""
+
+  if ctx.attr.vars:
+    print("'vars' attribute is deprecated, please use 'ext_strs'.")
+  if ctx.attr.code_vars:
+    print("'code_vars' attribute is deprecated, please use 'ext_code'.")
+
   depinfo = _setup_deps(ctx.attr.deps)
   toolchain = _jsonnet_toolchain(ctx)
-  jsonnet_ext_strs = ctx.attr.ext_strs
+  jsonnet_ext_strs = ctx.attr.ext_strs or ctx.attr.vars
   jsonnet_ext_str_envs = ctx.attr.ext_str_envs
-  jsonnet_ext_code = ctx.attr.ext_code
+  jsonnet_ext_code = ctx.attr.ext_code or ctx.attr.code_vars
   jsonnet_ext_code_envs = ctx.attr.ext_code_envs
   jsonnet_ext_str_files = ctx.attr.ext_str_files
   jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
@@ -371,6 +377,8 @@ _jsonnet_compile_attrs = {
         allow_files = _JSONNET_FILETYPE,
         single_file = True,
     ),
+    "vars": attr.string_dict(),  # Deprecated (use 'ext_strs').
+    "code_vars": attr.string_dict(),  # Deprecated (use 'ext_code').
     "ext_strs": attr.string_dict(),
     "ext_str_envs": attr.string_list(),
     "ext_code": attr.string_dict(),
@@ -388,7 +396,10 @@ _jsonnet_compile_attrs = {
 _jsonnet_to_json_attrs = {
     "outs": attr.output_list(mandatory = True),
     "multiple_outputs": attr.bool(),
-    "yaml_stream": attr.bool(default = False, mandatory = False),
+    "yaml_stream": attr.bool(
+        default = False,
+        mandatory = False,
+    ),
 }
 
 jsonnet_to_json = rule(
@@ -434,10 +445,10 @@ Args:
     }
     ```
   imports: List of import `-J` flags to be passed to the `jsonnet` compiler.
-  vars: Map of variables to pass to jsonnet via `--var key=value` flags. Values
-    containing make variables will be expanded.
-  code_vars: Map of code variables to pass to jsonnet via `--code-var key-value`
-    flags.
+  vars: *Deprecated* Use `ext_strs`.  Map of variables to pass to jsonnet via
+    `--var key=value` flags. Values containing make variables will be expanded.
+  code_vars: *Deprecated* Use `ext_code`.  Map of code variables to pass to
+    jsonnet via `--code-var key-value` flags.
 
 Example:
   ### Example
@@ -550,7 +561,10 @@ _jsonnet_to_json_test_attrs = {
     ),
     "error": attr.int(),
     "regex": attr.bool(),
-    "yaml_stream": attr.bool(default = False, mandatory = False),
+    "yaml_stream": attr.bool(
+        default = False,
+        mandatory = False,
+    ),
 }
 
 jsonnet_to_json_test = rule(
@@ -571,10 +585,10 @@ Args:
   src: The `.jsonnet` file to convert to JSON.
   deps: List of targets that are required by the `src` Jsonnet file.
   imports: List of import `-J` flags to be passed to the `jsonnet` compiler.
-  vars: Map of variables to pass to jsonnet via `--var key=value` flags. Values
-    containing make variables will be expanded.
-  code_vars: Map of code variables to pass to jsonnet via `--code-var key-value`
-    flags.
+  vars: *Deprecated* Use `ext_strs`.  Map of variables to pass to jsonnet via
+    `--var key=value` flags. Values containing make variables will be expanded.
+  code_vars: *Deprecated* Use `ext_code`.  Map of code variables to pass to'
+    jsonnet via `--code-var key-value` flags.
   golden: The expected (combined stdout and stderr) output to compare to the
     output of running `jsonnet` on `src`.
   error: The expected error code from running `jsonnet` on `src`.
