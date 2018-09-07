@@ -158,7 +158,11 @@ def _jsonnet_to_json_impl(ctx):
 
   transitive_data = depset()
   for dep in ctx.attr.deps:
-    transitive_data + dep.data_runfiles.files
+    # NB(sparkprime): (1) transitive_data is never used, since runfiles is only
+    # used when .files is pulled from it.  (2) This makes sense - jsonnet does
+    # not need transitive dependencies to be passed on the commandline. It
+    # needs the -J but that is handled separately.
+    transitive_data += dep.data_runfiles.files
 
   files = (
       [list(jfile.files)[0] for jfile in jsonnet_ext_str_files] +
