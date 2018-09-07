@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 """Jsonnet Rules
 
 These are build rules for working with [Jsonnet][jsonnet] files with Bazel.
@@ -138,9 +140,17 @@ def _make_stamp_resolve(ext_vars, ctx, relative=True):
 
 def _jsonnet_to_json_impl(ctx):
   """Implementation of the jsonnet_to_json rule."""
+
+  if ctx.attr.vars:
+    print("'vars' attribute is deprecated, please use 'ext_strs'.")
+  if ctx.attr.code_vars:
+    print("'code_vars' attribute is deprecated, please use 'ext_code'.")
+
   depinfo = _setup_deps(ctx.attr.deps)
   toolchain = _jsonnet_toolchain(ctx)
+  jsonnet_ext_strs = ctx.attr.ext_strs or ctx.attr.vars
   jsonnet_ext_str_envs = ctx.attr.ext_str_envs
+  jsonnet_ext_code = ctx.attr.ext_code or ctx.attr.code_vars
   jsonnet_ext_code_envs = ctx.attr.ext_code_envs
   jsonnet_ext_str_files = ctx.attr.ext_str_files
   jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
@@ -161,7 +171,7 @@ def _jsonnet_to_json_impl(ctx):
           toolchain.jsonnet_path,
       ] +
       ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
-      ["-J %s" % im for im in depinfo.imports] +
+      ["-J %s" % im for im in depinfo.imports.to_list()] +
       ["-J .",
        "-J %s" % ctx.genfiles_dir.path,
        "-J %s" % ctx.bin_dir.path] +
@@ -196,7 +206,11 @@ def _jsonnet_to_json_impl(ctx):
 
   transitive_data = depset()
   for dep in ctx.attr.deps:
-    transitive_data + dep.data_runfiles.files
+    # NB(sparkprime): (1) transitive_data is never used, since runfiles is only
+    # used when .files is pulled from it.  (2) This makes sense - jsonnet does
+    # not need transitive dependencies to be passed on the commandline. It
+    # needs the -J but that is handled separately.
+    transitive_data += dep.data_runfiles.files
 
   files = (
       [list(jfile.files)[0] for jfile in jsonnet_ext_str_files] +
@@ -210,12 +224,15 @@ def _jsonnet_to_json_impl(ctx):
   )
 
   compile_inputs = (
-      [ctx.file.src, ctx.executable.jsonnet] +
-      list(runfiles.files) +
-      list(depinfo.transitive_sources))
+      [ctx.file.src] +
+      runfiles.files.to_list() +
+      depinfo.transitive_sources.to_list())
 
-  ctx.action(
+  tools = [ctx.executable.jsonnet]
+
+  ctx.actions.run_shell(
       inputs = compile_inputs + stamp_inputs,
+      tools = tools,
       outputs = outputs,
       mnemonic = "Jsonnet",
       command = " ".join(command),
@@ -360,7 +377,7 @@ _jsonnet_common_attrs = {
         default = Label("@jsonnet//cmd:jsonnet"),
         cfg = "host",
         executable = True,
-        single_file = True,
+        allow_single_file = True,
     ),
     "data": attr.label_list(
         allow_files = True,
@@ -416,10 +433,9 @@ Example:
 """
 
 _jsonnet_compile_attrs = {
-    "src": attr.label(
-        allow_files = _JSONNET_FILETYPE,
-        single_file = True,
-    ),
+    "src": attr.label(allow_single_file = _JSONNET_FILETYPE),
+    "vars": attr.string_dict(),  # Deprecated (use 'ext_strs').
+    "code_vars": attr.string_dict(),  # Deprecated (use 'ext_code').
     "ext_strs": attr.string_dict(),
     "ext_str_envs": attr.string_list(),
     "ext_code": attr.string_dict(),
@@ -447,7 +463,10 @@ _jsonnet_compile_attrs = {
 _jsonnet_to_json_attrs = {
     "outs": attr.output_list(mandatory = True),
     "multiple_outputs": attr.bool(),
-    "yaml_stream": attr.bool(default = False, mandatory = False),
+    "yaml_stream": attr.bool(
+        default = False,
+        mandatory = False,
+    ),
 }
 
 jsonnet_to_json = rule(
@@ -493,10 +512,10 @@ Args:
     }
     ```
   imports: List of import `-J` flags to be passed to the `jsonnet` compiler.
-  vars: Map of variables to pass to jsonnet via `--var key=value` flags. Values
-    containing make variables will be expanded.
-  code_vars: Map of code variables to pass to jsonnet via `--code-var key-value`
-    flags.
+  vars: *Deprecated* Use `ext_strs`.  Map of variables to pass to jsonnet via
+    `--var key=value` flags. Values containing make variables will be expanded.
+  code_vars: *Deprecated* Use `ext_code`.  Map of code variables to pass to
+    jsonnet via `--code-var key-value` flags.
 
 Example:
   ### Example
@@ -603,13 +622,13 @@ Example:
 """
 
 _jsonnet_to_json_test_attrs = {
-    "golden": attr.label(
-        allow_files = True,
-        single_file = True,
-    ),
+    "golden": attr.label(allow_single_file = True),
     "error": attr.int(),
     "regex": attr.bool(),
-    "yaml_stream": attr.bool(default = False, mandatory = False),
+    "yaml_stream": attr.bool(
+        default = False,
+        mandatory = False,
+    ),
 }
 
 jsonnet_to_json_test = rule(
@@ -630,10 +649,10 @@ Args:
   src: The `.jsonnet` file to convert to JSON.
   deps: List of targets that are required by the `src` Jsonnet file.
   imports: List of import `-J` flags to be passed to the `jsonnet` compiler.
-  vars: Map of variables to pass to jsonnet via `--var key=value` flags. Values
-    containing make variables will be expanded.
-  code_vars: Map of code variables to pass to jsonnet via `--code-var key-value`
-    flags.
+  vars: *Deprecated* Use `ext_strs`.  Map of variables to pass to jsonnet via
+    `--var key=value` flags. Values containing make variables will be expanded.
+  code_vars: *Deprecated* Use `ext_code`.  Map of code variables to pass to'
+    jsonnet via `--code-var key-value` flags.
   golden: The expected (combined stdout and stderr) output to compare to the
     output of running `jsonnet` on `src`.
   error: The expected error code from running `jsonnet` on `src`.
@@ -740,12 +759,12 @@ Example:
 
 def jsonnet_repositories():
   """Adds the external dependencies needed for the Jsonnet rules."""
-  native.http_archive(
+  http_archive(
       name = "jsonnet",
       urls = [
-          "https://mirror.bazel.build/github.com/google/jsonnet/archive/v0.10.0.tar.gz",
-          "https://github.com/google/jsonnet/archive/v0.10.0.tar.gz",
+          "https://mirror.bazel.build/github.com/google/jsonnet/archive/v0.11.2.tar.gz",
+          "https://github.com/google/jsonnet/archive/v0.11.2.tar.gz",
       ],
-      sha256 = "524b15ab7780951683237061bc675313fc95942e7164f59a7ad2d1c46341c108",
-      strip_prefix = "jsonnet-0.10.0",
+      sha256 = "c7c33f159a9391e90ab646b3b5fd671dab356d8563dc447ee824ecd77f4609f8",
+      strip_prefix = "jsonnet-0.11.2",
   )
