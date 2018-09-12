@@ -152,9 +152,9 @@ def _jsonnet_to_json_impl(ctx):
   jsonnet_ext_str_envs = ctx.attr.ext_str_envs
   jsonnet_ext_code = ctx.attr.ext_code or ctx.attr.code_vars
   jsonnet_ext_code_envs = ctx.attr.ext_code_envs
-  jsonnet_ext_str_files = ctx.attr.ext_str_files
+  jsonnet_ext_str_files = ctx.files.ext_str_files
   jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
-  jsonnet_ext_code_files = ctx.attr.ext_code_files
+  jsonnet_ext_code_files = ctx.files.ext_code_files
   jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
 
   jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, False)
@@ -185,9 +185,9 @@ def _jsonnet_to_json_impl(ctx):
       ["--ext-code %s"
        % ext_code_env for ext_code_env in jsonnet_ext_code_envs] +
       ["--ext-str-file %s=%s"
-       % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
+       % (var, jfile.path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
       ["--ext-code-file %s=%s"
-       % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)])
+       % (var, jfile.path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)])
 
   outputs = []
   # If multiple_outputs is set to true, then jsonnet will be invoked with the
@@ -212,10 +212,7 @@ def _jsonnet_to_json_impl(ctx):
     # needs the -J but that is handled separately.
     transitive_data += dep.data_runfiles.files
 
-  files = (
-      [list(jfile.files)[0] for jfile in jsonnet_ext_str_files] +
-      [list(jfile.files)[0] for jfile in jsonnet_ext_code_files]
-  )
+  files = jsonnet_ext_str_files + jsonnet_ext_code_files
 
   runfiles = ctx.runfiles(
       collect_data = True,
@@ -301,9 +298,9 @@ def _jsonnet_to_json_test_impl(ctx):
 
   jsonnet_ext_str_envs = ctx.attr.ext_str_envs
   jsonnet_ext_code_envs = ctx.attr.ext_code_envs
-  jsonnet_ext_str_files = ctx.attr.ext_str_files
+  jsonnet_ext_str_files = ctx.files.ext_str_files
   jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
-  jsonnet_ext_code_files = ctx.attr.ext_code_files
+  jsonnet_ext_code_files = ctx.files.ext_code_files
   jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
 
   jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, True)
@@ -326,9 +323,9 @@ def _jsonnet_to_json_test_impl(ctx):
       ["--ext-code %s"
        % ext_code_env for ext_code_env in jsonnet_ext_code_envs] +
       ["--ext-str-file %s=%s"
-       % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
+       % (var, jfile.path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
       ["--ext-code-file %s=%s"
-       % (var, list(jfile.files)[0].path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] +
+       % (var, jfile.path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] +
       [
           ctx.file.src.short_path,
           "2>&1)",
@@ -355,10 +352,10 @@ def _jsonnet_to_json_test_impl(ctx):
       golden_files +
       list(transitive_data) +
       list(depinfo.transitive_sources) +
-      [list(jfile.files)[0] for jfile in jsonnet_ext_str_files] +
-      [list(jfile.files)[0] for jfile in jsonnet_ext_code_files] +
+      jsonnet_ext_str_files +
+      jsonnet_ext_code_files +
       stamp_inputs
-    )
+  )
 
   return struct(
       runfiles = ctx.runfiles(
