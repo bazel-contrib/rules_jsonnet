@@ -1,2 +1,5 @@
-build --action_env MYTEST="test" --action_env MYJSONNET="{code: 'some code'}"
+build --action_env MYTEST="test" --action_env MYJSONNET="{code: 'some code'}" 
 build --define mydefine="sky"
+build --workspace_status_command=tools/stamping/workspace_status.sh
+build --verbose_failures
+test --test_verbose_timeout_warnings --test_summary=detailed --test_output=all

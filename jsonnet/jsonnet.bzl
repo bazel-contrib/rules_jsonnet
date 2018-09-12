@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 """Jsonnet Rules
 
 These are build rules for working with [Jsonnet][jsonnet] files with Bazel.
@@ -90,7 +92,24 @@ def _jsonnet_toolchain(ctx):
       jsonnet_path = ctx.executable.jsonnet.path)
 
 def _quote(s):
-  return "'" + s.replace("'", "'\\''") + "'"
+  return '"' + s.replace('"', '\\"') + '"'
+
+def _stamp_resolve(ctx, string, output):
+  stamps = [ctx.info_file, ctx.version_file]
+  stamp_args = [
+    "--stamp-info-file=%s" % sf.path
+    for sf in stamps
+  ]
+  ctx.action(
+    executable = ctx.executable._stamper,
+    arguments = [
+      "--format=%s" % string,
+      "--output=%s" % output.path,
+    ] + stamp_args,
+    inputs = [ctx.executable._stamper] + stamps,
+    outputs = [output],
+    mnemonic = "Stamp"
+  )
 
 def _make_resolve(ctx, val):
     if val[0:2] == "$(" and val[-1] == ")":
@@ -98,18 +117,53 @@ def _make_resolve(ctx, val):
     else:
         return val
 
+def _make_stamp_resolve(ext_vars, ctx, relative=True):
+  results = {}
+  stamp_inputs = []
+  for key, val in ext_vars.items():
+    # Check for make variables
+    val = _make_resolve(ctx, val)
+    # Check for stamp variables
+    if ctx.attr.stamp_keys:
+      if key in ctx.attr.stamp_keys:
+        stamp_file = ctx.actions.declare_file(ctx.label.name + ".jsonnet_" + key)
+        _stamp_resolve(ctx, val, stamp_file)
+        if relative:
+          val = '$(cat %s)' % stamp_file.short_path
+        else:
+          val = '$(cat %s)' % stamp_file.path
+        stamp_inputs += [stamp_file]
+
+    results[key] = val
+
+  return results, stamp_inputs
+
 def _jsonnet_to_json_impl(ctx):
   """Implementation of the jsonnet_to_json rule."""
+
+  if ctx.attr.vars:
+    print("'vars' attribute is deprecated, please use 'ext_strs'.")
+  if ctx.attr.code_vars:
+    print("'code_vars' attribute is deprecated, please use 'ext_code'.")
+
   depinfo = _setup_deps(ctx.attr.deps)
   toolchain = _jsonnet_toolchain(ctx)
-  jsonnet_ext_strs = ctx.attr.ext_strs
+  jsonnet_ext_strs = ctx.attr.ext_strs or ctx.attr.vars
   jsonnet_ext_str_envs = ctx.attr.ext_str_envs
-  jsonnet_ext_code = ctx.attr.ext_code
+  jsonnet_ext_code = ctx.attr.ext_code or ctx.attr.code_vars
   jsonnet_ext_code_envs = ctx.attr.ext_code_envs
   jsonnet_ext_str_files = ctx.files.ext_str_files
   jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
   jsonnet_ext_code_files = ctx.files.ext_code_files
   jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
+
+  jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, False)
+  jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, False)
+  stamp_inputs = strs_stamp_inputs + code_stamp_inputs
+
+  if ctx.attr.stamp_keys and not stamp_inputs:
+    fail("Stamping requested but found no stamp variable to resolve for.")
+
   yaml_stream_arg = ["-y"] if ctx.attr.yaml_stream else []
   command = (
       [
@@ -117,18 +171,18 @@ def _jsonnet_to_json_impl(ctx):
           toolchain.jsonnet_path,
       ] +
       ["-J %s/%s" % (ctx.label.package, im) for im in ctx.attr.imports] +
-      ["-J %s" % im for im in depinfo.imports] +
+      ["-J %s" % im for im in depinfo.imports.to_list()] +
       ["-J .",
        "-J %s" % ctx.genfiles_dir.path,
        "-J %s" % ctx.bin_dir.path] +
       yaml_stream_arg +
       ["--ext-str %s=%s"
-       % (_quote(key), _quote(_make_resolve(ctx, val))) for key, val in jsonnet_ext_strs.items()] +
+       % (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str '%s'"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
-      ["--ext-code '%s'='%s'"
-       % (var, jsonnet_ext_code[var]) for var in jsonnet_ext_code.keys()] +
-      ["--ext-code '%s'"
+      ["--ext-code %s=%s"
+       % (_quote(key), _quote(val)) for key, val in jsonnet_ext_code.items()] +
+      ["--ext-code %s"
        % ext_code_env for ext_code_env in jsonnet_ext_code_envs] +
       ["--ext-str-file %s=%s"
        % (var, jfile.path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
@@ -152,7 +206,11 @@ def _jsonnet_to_json_impl(ctx):
 
   transitive_data = depset()
   for dep in ctx.attr.deps:
-    transitive_data + dep.data_runfiles.files
+    # NB(sparkprime): (1) transitive_data is never used, since runfiles is only
+    # used when .files is pulled from it.  (2) This makes sense - jsonnet does
+    # not need transitive dependencies to be passed on the commandline. It
+    # needs the -J but that is handled separately.
+    transitive_data += dep.data_runfiles.files
 
   files = jsonnet_ext_str_files + jsonnet_ext_code_files
 
@@ -163,12 +221,15 @@ def _jsonnet_to_json_impl(ctx):
   )
 
   compile_inputs = (
-      [ctx.file.src, ctx.executable.jsonnet] +
-      list(runfiles.files) +
-      list(depinfo.transitive_sources))
+      [ctx.file.src] +
+      runfiles.files.to_list() +
+      depinfo.transitive_sources.to_list())
 
-  ctx.action(
-      inputs = compile_inputs,
+  tools = [ctx.executable.jsonnet]
+
+  ctx.actions.run_shell(
+      inputs = compile_inputs + stamp_inputs,
+      tools = tools,
       outputs = outputs,
       mnemonic = "Jsonnet",
       command = " ".join(command),
@@ -235,14 +296,17 @@ def _jsonnet_to_json_test_impl(ctx):
           ctx.label.name,
       )
 
-  jsonnet_ext_strs = ctx.attr.ext_strs
   jsonnet_ext_str_envs = ctx.attr.ext_str_envs
-  jsonnet_ext_code = ctx.attr.ext_code
   jsonnet_ext_code_envs = ctx.attr.ext_code_envs
   jsonnet_ext_str_files = ctx.files.ext_str_files
   jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
   jsonnet_ext_code_files = ctx.files.ext_code_files
   jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
+
+  jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, True)
+  jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, True)
+  stamp_inputs = strs_stamp_inputs + code_stamp_inputs
+
   yaml_stream_arg = ["-y"] if ctx.attr.yaml_stream else []
   jsonnet_command = " ".join(
       ["OUTPUT=$(%s" % ctx.executable.jsonnet.short_path] +
@@ -251,11 +315,11 @@ def _jsonnet_to_json_test_impl(ctx):
       ["-J ."] +
       yaml_stream_arg +
       ["--ext-str %s=%s"
-       % (_quote(key), _quote(_make_resolve(ctx, val))) for key, val in jsonnet_ext_strs.items()] +
+       % (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
       ["--ext-str %s"
        % ext_str_env for ext_str_env in jsonnet_ext_str_envs] +
       ["--ext-code %s=%s"
-       % (var, jsonnet_ext_code[var]) for var in jsonnet_ext_code.keys()] +
+       % (_quote(key), _quote(val)) for key, val in jsonnet_ext_code.items()] +
       ["--ext-code %s"
        % ext_code_env for ext_code_env in jsonnet_ext_code_envs] +
       ["--ext-str-file %s=%s"
@@ -289,7 +353,9 @@ def _jsonnet_to_json_test_impl(ctx):
       list(transitive_data) +
       list(depinfo.transitive_sources) +
       jsonnet_ext_str_files +
-      jsonnet_ext_code_files)
+      jsonnet_ext_code_files +
+      stamp_inputs
+  )
 
   return struct(
       runfiles = ctx.runfiles(
@@ -308,7 +374,7 @@ _jsonnet_common_attrs = {
         default = Label("@jsonnet//cmd:jsonnet"),
         cfg = "host",
         executable = True,
-        single_file = True,
+        allow_single_file = True,
     ),
     "data": attr.label_list(
         allow_files = True,
@@ -364,10 +430,9 @@ Example:
 """
 
 _jsonnet_compile_attrs = {
-    "src": attr.label(
-        allow_files = _JSONNET_FILETYPE,
-        single_file = True,
-    ),
+    "src": attr.label(allow_single_file = _JSONNET_FILETYPE),
+    "vars": attr.string_dict(),  # Deprecated (use 'ext_strs').
+    "code_vars": attr.string_dict(),  # Deprecated (use 'ext_code').
     "ext_strs": attr.string_dict(),
     "ext_str_envs": attr.string_list(),
     "ext_code": attr.string_dict(),
@@ -380,12 +445,25 @@ _jsonnet_compile_attrs = {
         allow_files = True,
     ),
     "ext_code_file_vars": attr.string_list(),
+    "stamp_keys": attr.string_list(
+        default = [],
+        mandatory = False,
+    ),
+    "_stamper": attr.label(
+        default = Label("//jsonnet:stamper"),
+        cfg = "host",
+        executable = True,
+        allow_files = True,
+    ),
 }
 
 _jsonnet_to_json_attrs = {
     "outs": attr.output_list(mandatory = True),
     "multiple_outputs": attr.bool(),
-    "yaml_stream": attr.bool(default = False, mandatory = False),
+    "yaml_stream": attr.bool(
+        default = False,
+        mandatory = False,
+    ),
 }
 
 jsonnet_to_json = rule(
@@ -431,10 +509,10 @@ Args:
     }
     ```
   imports: List of import `-J` flags to be passed to the `jsonnet` compiler.
-  vars: Map of variables to pass to jsonnet via `--var key=value` flags. Values
-    containing make variables will be expanded.
-  code_vars: Map of code variables to pass to jsonnet via `--code-var key-value`
-    flags.
+  vars: *Deprecated* Use `ext_strs`.  Map of variables to pass to jsonnet via
+    `--var key=value` flags. Values containing make variables will be expanded.
+  code_vars: *Deprecated* Use `ext_code`.  Map of code variables to pass to
+    jsonnet via `--code-var key-value` flags.
 
 Example:
   ### Example
@@ -541,13 +619,13 @@ Example:
 """
 
 _jsonnet_to_json_test_attrs = {
-    "golden": attr.label(
-        allow_files = True,
-        single_file = True,
-    ),
+    "golden": attr.label(allow_single_file = True),
     "error": attr.int(),
     "regex": attr.bool(),
-    "yaml_stream": attr.bool(default = False, mandatory = False),
+    "yaml_stream": attr.bool(
+        default = False,
+        mandatory = False,
+    ),
 }
 
 jsonnet_to_json_test = rule(
@@ -568,10 +646,10 @@ Args:
   src: The `.jsonnet` file to convert to JSON.
   deps: List of targets that are required by the `src` Jsonnet file.
   imports: List of import `-J` flags to be passed to the `jsonnet` compiler.
-  vars: Map of variables to pass to jsonnet via `--var key=value` flags. Values
-    containing make variables will be expanded.
-  code_vars: Map of code variables to pass to jsonnet via `--code-var key-value`
-    flags.
+  vars: *Deprecated* Use `ext_strs`.  Map of variables to pass to jsonnet via
+    `--var key=value` flags. Values containing make variables will be expanded.
+  code_vars: *Deprecated* Use `ext_code`.  Map of code variables to pass to'
+    jsonnet via `--code-var key-value` flags.
   golden: The expected (combined stdout and stderr) output to compare to the
     output of running `jsonnet` on `src`.
   error: The expected error code from running `jsonnet` on `src`.
@@ -678,12 +756,12 @@ Example:
 
 def jsonnet_repositories():
   """Adds the external dependencies needed for the Jsonnet rules."""
-  native.http_archive(
+  http_archive(
       name = "jsonnet",
       urls = [
-          "https://mirror.bazel.build/github.com/google/jsonnet/archive/v0.10.0.tar.gz",
-          "https://github.com/google/jsonnet/archive/v0.10.0.tar.gz",
+          "https://mirror.bazel.build/github.com/google/jsonnet/archive/v0.11.2.tar.gz",
+          "https://github.com/google/jsonnet/archive/v0.11.2.tar.gz",
       ],
-      sha256 = "524b15ab7780951683237061bc675313fc95942e7164f59a7ad2d1c46341c108",
-      strip_prefix = "jsonnet-0.10.0",
+      sha256 = "c7c33f159a9391e90ab646b3b5fd671dab356d8563dc447ee824ecd77f4609f8",
+      strip_prefix = "jsonnet-0.11.2",
   )
