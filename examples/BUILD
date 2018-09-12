@@ -104,6 +104,23 @@ genrule(
 )
 
 jsonnet_to_json_test(
+    name = "extvar_stamp_test",
+    size = "small",
+    src = "extvar_stamp.jsonnet",
+    ext_strs = {
+      "non_stamp": "non_stamp",
+      "mydefine": "$(mydefine)",
+      "k8s": "{STABLE_K8S_CLUSTER}",
+    },
+    ext_code = {
+      "complex": "{COMPLEX_JSON}",
+      "my_json": "{test: 'something'}",
+    },
+    stamp_keys = ["k8s", "complex"],
+    golden = "extvar_stamp_golden.json"
+)
+
+jsonnet_to_json_test(
     name = "yaml_stream_test",
     src = "yaml_stream.jsonnet",
     golden = "yaml_stream_golden.yaml",
