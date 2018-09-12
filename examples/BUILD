@@ -90,6 +90,39 @@ jsonnet_to_json_test(
     golden = "extvar_files_golden.json",
 )
 
+filegroup(
+    name = "test_str_files",
+    srcs = [
+        "file.txt",
+        "WORKSPACE",
+    ],
+)
+
+filegroup(
+    name = "test_code_files",
+    srcs = [
+        "codefile.libsonnet",
+        "codefile2.libsonnet",
+    ],
+)
+
+jsonnet_to_json_test(
+    name = "extvar_files_test_filegroup",
+    size = "small",
+    src = "extvar_filegroup.jsonnet",
+    ext_code_file_vars = [
+        "codefile",
+        "codefile2",
+    ],
+    ext_code_files = [":test_code_files"],
+    ext_str_file_vars = [
+        "test",
+        "workspace",
+    ],
+    ext_str_files = [":test_str_files"],
+    golden = "extvar_filegroup_golden.json",
+)
+
 jsonnet_to_json_test(
     name = "generated_src_test",
     src = ":generated",
