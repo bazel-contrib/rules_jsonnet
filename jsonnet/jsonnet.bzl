@@ -376,9 +376,6 @@ _jsonnet_common_attrs = {
         executable = True,
         allow_single_file = True,
     ),
-    "data": attr.label_list(
-        allow_files = True,
-    ),
 }
 
 _jsonnet_library_attrs = {
