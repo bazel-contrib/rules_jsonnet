@@ -254,8 +254,6 @@ if [ "$OUTPUT" != "$GOLDEN" ]; then
   echo "FAIL (output mismatch): %s"
   echo "Diff:"
   diff <(echo $GOLDEN) <(echo $OUTPUT)
-  echo "Expected: $GOLDEN"
-  echo "Actual: $OUTPUT"
   exit 1
 fi
 """
