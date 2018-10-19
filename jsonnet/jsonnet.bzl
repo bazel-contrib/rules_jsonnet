@@ -253,7 +253,7 @@ GOLDEN=$(%s %s)
 if [ "$OUTPUT" != "$GOLDEN" ]; then
   echo "FAIL (output mismatch): %s"
   echo "Diff:"
-  diff <(echo $GOLDEN) <(echo $OUTPUT)
+  diff <(echo "$GOLDEN") <(echo "$OUTPUT")
   exit 1
 fi
 """
