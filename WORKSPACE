@@ -1,5 +1,7 @@
 workspace(name = "io_bazel_rules_jsonnet")
 
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
 local_repository(
     name = "examples",
     path = "examples",
