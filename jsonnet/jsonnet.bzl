@@ -361,7 +361,11 @@ def _jsonnet_to_json_test_impl(ctx):
     command = [
         "#!/bin/bash",
         jsonnet_command,
-        _EXIT_CODE_COMPARE_COMMAND % (ctx.attr.error, ctx.label.name),
+        _EXIT_CODE_COMPARE_COMMAND % (
+            ctx.attr.error,
+            ctx.label.name,
+            "true" if ctx.attr.output_file_contents else "false",
+        ),
     ]
     if diff_command:
         command += [diff_command]
