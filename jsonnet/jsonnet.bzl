@@ -259,7 +259,9 @@ if [ $EXIT_CODE -ne $EXPECTED_EXIT_CODE ] ; then
   echo "FAIL (exit code): %s"
   echo "Expected: $EXPECTED_EXIT_CODE"
   echo "Actual: $EXIT_CODE"
-  echo "Output: $OUTPUT"
+  if [ %s = true]; then
+    echo "Output: $OUTPUT"
+  fi
   exit 1
 fi
 """
@@ -270,8 +272,10 @@ if [ "$OUTPUT" != "$GOLDEN" ]; then
   echo "FAIL (output mismatch): %s"
   echo "Diff:"
   diff <(echo "$GOLDEN") <(echo "$OUTPUT")
-  echo "Expected: $GOLDEN"
-  echo "Actual: $OUTPUT"
+  if [ %s = true]; then
+    echo "Expected: $GOLDEN"
+    echo "Actual: $OUTPUT"
+  fi
   exit 1
 fi
 """
@@ -280,7 +284,9 @@ _REGEX_DIFF_COMMAND = """
 GOLDEN_REGEX=$(%s %s)
 if [[ ! "$OUTPUT" =~ $GOLDEN_REGEX ]]; then
   echo "FAIL (regex mismatch): %s"
-  echo "Output: $OUTPUT"
+  if [ %s = true]; then
+    echo "Output: $OUTPUT"
+  fi
   exit 1
 fi
 """
@@ -308,12 +314,14 @@ def _jsonnet_to_json_test_impl(ctx):
                 dump_golden_cmd,
                 ctx.file.golden.short_path,
                 ctx.label.name,
+                "true" if ctx.attr.output_file_contents else "false",
             )
         else:
             diff_command = _DIFF_COMMAND % (
                 dump_golden_cmd,
                 ctx.file.golden.short_path,
                 ctx.label.name,
+                "true" if ctx.attr.output_file_contents else "false",
             )
 
     jsonnet_ext_str_envs = ctx.attr.ext_str_envs
@@ -645,6 +653,7 @@ _jsonnet_to_json_test_attrs = {
     "golden": attr.label(allow_single_file = True),
     "regex": attr.bool(),
     "canonicalize_golden": attr.bool(default = True),
+    "output_file_contents": attr.bool(default = True),
 }
 
 jsonnet_to_json_test = rule(
