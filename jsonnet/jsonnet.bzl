@@ -364,8 +364,8 @@ def _jsonnet_to_json_test_impl(ctx):
 
     test_inputs = (
         [ctx.file.src, ctx.executable.jsonnet] + golden_files +
-        list(transitive_data) +
-        list(depinfo.transitive_sources) +
+        transitive_data.to_list() +
+        depinfo.transitive_sources.to_list() +
         jsonnet_ext_str_files +
         jsonnet_ext_code_files +
         stamp_inputs
