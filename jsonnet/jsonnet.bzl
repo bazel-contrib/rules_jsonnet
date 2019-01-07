@@ -773,10 +773,9 @@ def jsonnet_repositories():
     """Adds the external dependencies needed for the Jsonnet rules."""
     http_archive(
         name = "jsonnet",
-        sha256 = "c7c33f159a9391e90ab646b3b5fd671dab356d8563dc447ee824ecd77f4609f8",
-        strip_prefix = "jsonnet-0.11.2",
+        sha256 = "257c6de988f746cc90486d9d0fbd49826832b7a2f0dbdb60a515cc8a2596c950",
+        strip_prefix = "jsonnet-0.12.1",
         urls = [
-            "https://mirror.bazel.build/github.com/google/jsonnet/archive/v0.11.2.tar.gz",
-            "https://github.com/google/jsonnet/archive/v0.11.2.tar.gz",
+            "https://github.com/google/jsonnet/archive/v0.12.1.tar.gz",
         ],
     )
