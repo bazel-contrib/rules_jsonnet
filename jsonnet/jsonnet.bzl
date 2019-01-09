@@ -111,7 +111,7 @@ def _stamp_resolve(ctx, string, output):
         "--stamp-info-file=%s" % sf.path
         for sf in stamps
     ]
-    ctx.action(
+    ctx.actions.run(
         executable = ctx.executable._stamper,
         arguments = [
             "--format=%s" % string,
@@ -352,10 +352,10 @@ def _jsonnet_to_json_test_impl(ctx):
     if diff_command:
         command += [diff_command]
 
-    ctx.file_action(
+    ctx.actions.write(
         output = ctx.outputs.executable,
         content = "\n".join(command),
-        executable = True,
+        is_executable = True,
     )
 
     transitive_data = depset()
@@ -380,9 +380,8 @@ def _jsonnet_to_json_test_impl(ctx):
     )
 
 _jsonnet_common_attrs = {
-    "deps": attr.label_list(
-        providers = ["transitive_jsonnet_files"],
-        allow_files = False,
+    "data": attr.label_list(
+        allow_files = True,
     ),
     "imports": attr.string_list(),
     "jsonnet": attr.label(
@@ -391,8 +390,9 @@ _jsonnet_common_attrs = {
         executable = True,
         allow_single_file = True,
     ),
-    "data": attr.label_list(
-        allow_files = True,
+    "deps": attr.label_list(
+        providers = ["transitive_jsonnet_files"],
+        allow_files = False,
     ),
 }
 
@@ -446,24 +446,24 @@ Example:
 
 _jsonnet_compile_attrs = {
     "src": attr.label(allow_single_file = _JSONNET_FILETYPE),
-    "vars": attr.string_dict(),  # Deprecated (use 'ext_strs').
     "code_vars": attr.string_dict(),  # Deprecated (use 'ext_code').
-    "ext_strs": attr.string_dict(),
-    "ext_str_envs": attr.string_list(),
     "ext_code": attr.string_dict(),
     "ext_code_envs": attr.string_list(),
-    "ext_str_files": attr.label_list(
-        allow_files = True,
-    ),
-    "ext_str_file_vars": attr.string_list(),
+    "ext_code_file_vars": attr.string_list(),
     "ext_code_files": attr.label_list(
         allow_files = True,
     ),
-    "ext_code_file_vars": attr.string_list(),
+    "ext_str_envs": attr.string_list(),
+    "ext_str_file_vars": attr.string_list(),
+    "ext_str_files": attr.label_list(
+        allow_files = True,
+    ),
+    "ext_strs": attr.string_dict(),
     "stamp_keys": attr.string_list(
         default = [],
         mandatory = False,
     ),
+    "vars": attr.string_dict(),  # Deprecated (use 'ext_strs').
     "_stamper": attr.label(
         default = Label("//jsonnet:stamper"),
         cfg = "host",
@@ -634,8 +634,8 @@ Example:
 """
 
 _jsonnet_to_json_test_attrs = {
-    "golden": attr.label(allow_single_file = True),
     "error": attr.int(),
+    "golden": attr.label(allow_single_file = True),
     "regex": attr.bool(),
     "yaml_stream": attr.bool(
         default = False,
