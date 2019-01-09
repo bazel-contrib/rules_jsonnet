@@ -68,25 +68,26 @@ def _setup_deps(deps):
         imports: List of Strings containing import flags set by transitive
             dependency targets.
     """
-    transitive_sources = depset(order = "postorder")
-    imports = depset()
+    transitive_sources = []
+    imports = []
     for dep in deps:
-        transitive_sources += dep.transitive_jsonnet_files
-        imports += dep.imports
+        transitive_sources.append(dep.transitive_jsonnet_files)
+        imports.append(dep.imports)
 
     return struct(
-        imports = imports,
-        transitive_sources = transitive_sources,
+        imports = depset(transitive = imports),
+        transitive_sources = depset(transitive = transitive_sources, order = "postorder"),
     )
 
 def _jsonnet_library_impl(ctx):
     """Implementation of the jsonnet_library rule."""
     depinfo = _setup_deps(ctx.attr.deps)
-    sources = depinfo.transitive_sources + ctx.files.srcs
-    imports = depinfo.imports + _add_prefix_to_imports(ctx.label, ctx.attr.imports)
-    transitive_data = depset()
-    for dep in ctx.attr.deps:
-        transitive_data += dep.data_runfiles.files
+    sources = depset(ctx.files.srcs, transitive = [depinfo.transitive_sources])
+    imports = depset(_add_prefix_to_imports(ctx.label, ctx.attr.imports), transitive = [depinfo.imports])
+    transitive_data = depset(
+        transitive = [dep.data_runfiles.files for dep in ctx.attr.deps],
+    )
+
     return struct(
         files = depset(),
         imports = imports,
@@ -117,7 +118,8 @@ def _stamp_resolve(ctx, string, output):
             "--format=%s" % string,
             "--output=%s" % output.path,
         ] + stamp_args,
-        inputs = [ctx.executable._stamper] + stamps,
+        inputs = stamps,
+        tools = [ctx.executable._stamper],
         outputs = [output],
         mnemonic = "Stamp",
     )
@@ -326,7 +328,7 @@ def _jsonnet_to_json_test_impl(ctx):
     jsonnet_command = " ".join(
         ["OUTPUT=$(%s" % ctx.executable.jsonnet.short_path] +
         ["-J %s" % im for im in _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
-        ["-J %s" % im for im in depinfo.imports] + ["-J ."] + yaml_stream_arg +
+        ["-J %s" % im for im in depinfo.imports.to_list()] + ["-J ."] + yaml_stream_arg +
         ["--ext-str %s=%s" %
          (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
         ["--ext-str %s" %
@@ -358,9 +360,9 @@ def _jsonnet_to_json_test_impl(ctx):
         is_executable = True,
     )
 
-    transitive_data = depset()
-    for dep in ctx.attr.deps:
-        transitive_data += dep.data_runfiles.files
+    transitive_data = depset(
+        transitive = [dep.data_runfiles.files for dep in ctx.attr.deps],
+    )
 
     test_inputs = (
         [ctx.file.src, ctx.executable.jsonnet] + golden_files +
