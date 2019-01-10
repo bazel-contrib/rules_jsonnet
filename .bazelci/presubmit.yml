@@ -14,6 +14,13 @@ platforms:
     test_targets:
     - "..."
     - "@examples//..."
+  ubuntu1804:
+    build_targets:
+    - "..."
+    - "@examples//..."
+    test_targets:
+    - "..."
+    - "@examples//..."
   macos:
     build_targets:
     - "..."
