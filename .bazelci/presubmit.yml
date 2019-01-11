@@ -1,12 +1,5 @@
 ---
 platforms:
-  ubuntu1404:
-    build_targets:
-    - "..."
-    - "@examples//..."
-    test_targets:
-    - "..."
-    - "@examples//..."
   ubuntu1604:
     build_targets:
     - "..."
