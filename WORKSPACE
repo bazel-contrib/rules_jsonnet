@@ -22,7 +22,8 @@ jsonnet_repositories()
 git_repository(
     name = "io_bazel_rules_sass",
     remote = "https://github.com/bazelbuild/rules_sass.git",
-    tag = "1.15.3",
+    commit = "a28d5ec04b32daef96299b22bb2fbd961c3febe6", # release 1.15.3
+    shallow_since = "1546636230 +0000"
 )
 
 load("@io_bazel_rules_sass//:package.bzl", "rules_sass_dependencies")
@@ -36,7 +37,8 @@ sass_repositories()
 git_repository(
     name = "io_bazel_skydoc",
     remote = "https://github.com/bazelbuild/skydoc.git",
-    tag = "0.2.0",
+    commit = "4ea7b8257d11ac33eef7e9daadbedbfe375d9236", # release 0.2.0
+    shallow_since = "1543532884 -0500",
 )
 
 load("@io_bazel_skydoc//skylark:skylark.bzl", "skydoc_repositories")
