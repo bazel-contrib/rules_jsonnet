@@ -178,7 +178,8 @@ def _jsonnet_to_json_impl(ctx):
     if ctx.attr.stamp_keys and not stamp_inputs:
         fail("Stamping requested but found no stamp variable to resolve for.")
 
-    yaml_stream_arg = ["-y"] if ctx.attr.yaml_stream else []
+    other_args = ctx.attr.extra_args + (["-y"] if ctx.attr.yaml_stream else [])
+
     command = (
         [
             "set -e;",
@@ -188,7 +189,7 @@ def _jsonnet_to_json_impl(ctx):
             "-J .",
             "-J %s" % ctx.genfiles_dir.path,
             "-J %s" % ctx.bin_dir.path,
-        ] + yaml_stream_arg +
+        ] + other_args +
         ["--ext-str %s=%s" %
          (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
         ["--ext-str '%s'" %
@@ -324,11 +325,12 @@ def _jsonnet_to_json_test_impl(ctx):
     jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, True)
     stamp_inputs = strs_stamp_inputs + code_stamp_inputs
 
-    yaml_stream_arg = ["-y"] if ctx.attr.yaml_stream else []
+    other_args = ctx.attr.extra_args + (["-y"] if ctx.attr.yaml_stream else [])
     jsonnet_command = " ".join(
         ["OUTPUT=$(%s" % ctx.executable.jsonnet.short_path] +
         ["-J %s" % im for im in _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
-        ["-J %s" % im for im in depinfo.imports.to_list()] + ["-J ."] + yaml_stream_arg +
+        ["-J %s" % im for im in depinfo.imports.to_list()] + ["-J ."] +
+        other_args +
         ["--ext-str %s=%s" %
          (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
         ["--ext-str %s" %
@@ -465,6 +467,11 @@ _jsonnet_compile_attrs = {
         default = [],
         mandatory = False,
     ),
+    "yaml_stream": attr.bool(
+        default = False,
+        mandatory = False,
+    ),
+    "extra_args": attr.string_list(),
     "vars": attr.string_dict(),  # Deprecated (use 'ext_strs').
     "_stamper": attr.label(
         default = Label("//jsonnet:stamper"),
@@ -477,10 +484,6 @@ _jsonnet_compile_attrs = {
 _jsonnet_to_json_attrs = {
     "outs": attr.output_list(mandatory = True),
     "multiple_outputs": attr.bool(),
-    "yaml_stream": attr.bool(
-        default = False,
-        mandatory = False,
-    ),
 }
 
 jsonnet_to_json = rule(
@@ -639,10 +642,6 @@ _jsonnet_to_json_test_attrs = {
     "error": attr.int(),
     "golden": attr.label(allow_single_file = True),
     "regex": attr.bool(),
-    "yaml_stream": attr.bool(
-        default = False,
-        mandatory = False,
-    ),
 }
 
 jsonnet_to_json_test = rule(
