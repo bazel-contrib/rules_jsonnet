@@ -298,9 +298,13 @@ def _jsonnet_to_json_test_impl(ctx):
         golden_files += [ctx.file.golden]
 
         # Note that we only run jsonnet to canonicalize the golden output if the
-        # expected return code is 0. Otherwise, the golden file contains the
+        # expected return code is 0, and canonicalize_golden was not explicitly disabled.
+        # Otherwise, the golden file contains the
         # expected error output.
-        dump_golden_cmd = (ctx.executable.jsonnet.short_path if ctx.attr.error == 0 and not ctx.attr.yaml_stream else "/bin/cat")
+
+        # For legacy reasons, we also disable canonicalize_golden for yaml_streams.
+        canonicalize = not (ctx.attr.yaml_stream or not ctx.attr.canonicalize_golden)
+        dump_golden_cmd = (ctx.executable.jsonnet.short_path if ctx.attr.error == 0 and canonicalize else "/bin/cat")
         if ctx.attr.regex:
             diff_command = _REGEX_DIFF_COMMAND % (
                 dump_golden_cmd,
@@ -642,6 +646,7 @@ _jsonnet_to_json_test_attrs = {
     "error": attr.int(),
     "golden": attr.label(allow_single_file = True),
     "regex": attr.bool(),
+    "canonicalize_golden": attr.bool(default = True),
 }
 
 jsonnet_to_json_test = rule(

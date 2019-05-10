@@ -170,3 +170,11 @@ jsonnet_to_json_test(
     imports = ["imports"],
     deps = ["//imports:a"],
 )
+
+jsonnet_to_json_test(
+    name = "strings_test",
+    src = "strings.jsonnet",
+    golden = "strings_golden.txt",
+    extra_args = ["--string"],
+    canonicalize_golden = False,
+)
