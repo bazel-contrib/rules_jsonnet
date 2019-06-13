@@ -790,9 +790,9 @@ def jsonnet_repositories():
     """Adds the external dependencies needed for the Jsonnet rules."""
     http_archive(
         name = "jsonnet",
-        sha256 = "257c6de988f746cc90486d9d0fbd49826832b7a2f0dbdb60a515cc8a2596c950",
-        strip_prefix = "jsonnet-0.12.1",
+        sha256 = "f6f0c4ea333f3423f1a7237a8a107c589354c38be8a2a438198f9f7c69b77596",
+        strip_prefix = "jsonnet-0.13.0",
         urls = [
-            "https://github.com/google/jsonnet/archive/v0.12.1.tar.gz",
+            "https://github.com/google/jsonnet/archive/v0.13.0.tar.gz",
         ],
     )
