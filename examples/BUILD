@@ -178,3 +178,11 @@ jsonnet_to_json_test(
     extra_args = ["--string"],
     canonicalize_golden = False,
 )
+
+jsonnet_to_json_test(
+    name = "output_file_contents_smoke_test",
+    src = "wordcount.jsonnet",
+    golden = "wordcount_golden.json",
+    deps = [":workflow"],
+    output_file_contents = False,
+)
