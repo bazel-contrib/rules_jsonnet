@@ -262,7 +262,7 @@ VAR1 value1
 CLUSTER ${CLUSTER_OVERRIDE:-default-value2}
 EOF
 </pre>
-      </td>
+</td>
     </tr>
     <tr>
       <td><code>ext_strs</code></td>
