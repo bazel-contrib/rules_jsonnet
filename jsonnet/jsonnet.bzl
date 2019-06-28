@@ -170,6 +170,7 @@ def _jsonnet_to_json_impl(ctx):
     jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
     jsonnet_ext_code_files = ctx.files.ext_code_files
     jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
+    jsonnet_tla_code_files = ctx.attr.tla_code_files
 
     jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, False)
     jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, False)
@@ -201,7 +202,9 @@ def _jsonnet_to_json_impl(ctx):
         ["--ext-str-file %s=%s" %
          (var, jfile.path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
         ["--ext-code-file %s=%s" %
-         (var, jfile.path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)]
+         (var, jfile.path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] +
+        ["--tla-code-file %s=%s" %
+         (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_code_files.items()]
     )
 
     outputs = []
@@ -220,7 +223,8 @@ def _jsonnet_to_json_impl(ctx):
         outputs += [compiled_json]
         command += [ctx.file.src.path, "-o", compiled_json.path]
 
-    transitive_data = depset(transitive = [dep.data_runfiles.files for dep in ctx.attr.deps])
+    transitive_data = depset(transitive = [dep.data_runfiles.files for dep in ctx.attr.deps] +
+        [l.files for l in jsonnet_tla_code_files.keys()])
     # NB(sparkprime): (1) transitive_data is never used, since runfiles is only
     # used when .files is pulled from it.  (2) This makes sense - jsonnet does
     # not need transitive dependencies to be passed on the commandline. It
@@ -259,7 +263,7 @@ if [ $EXIT_CODE -ne $EXPECTED_EXIT_CODE ] ; then
   echo "FAIL (exit code): %s"
   echo "Expected: $EXPECTED_EXIT_CODE"
   echo "Actual: $EXIT_CODE"
-  if [ %s = true]; then
+  if [ %s = true ]; then
     echo "Output: $OUTPUT"
   fi
   exit 1
@@ -272,7 +276,7 @@ if [ "$OUTPUT" != "$GOLDEN" ]; then
   echo "FAIL (output mismatch): %s"
   echo "Diff:"
   diff <(echo "$GOLDEN") <(echo "$OUTPUT")
-  if [ %s = true]; then
+  if [ %s = true ]; then
     echo "Expected: $GOLDEN"
     echo "Actual: $OUTPUT"
   fi
@@ -330,6 +334,7 @@ def _jsonnet_to_json_test_impl(ctx):
     jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
     jsonnet_ext_code_files = ctx.files.ext_code_files
     jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
+    jsonnet_tla_code_files = ctx.attr.tla_code_files
 
     jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, True)
     jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, True)
@@ -352,7 +357,10 @@ def _jsonnet_to_json_test_impl(ctx):
         ["--ext-str-file %s=%s" %
          (var, jfile.path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
         ["--ext-code-file %s=%s" %
-         (var, jfile.path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] + [
+         (var, jfile.path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] +
+        ["--tla-code-file %s=%s" %
+         (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_code_files.items()] +
+        [
             ctx.file.src.short_path,
             "2>&1)",
         ],
@@ -377,7 +385,8 @@ def _jsonnet_to_json_test_impl(ctx):
     )
 
     transitive_data = depset(
-        transitive = [dep.data_runfiles.files for dep in ctx.attr.deps],
+        transitive = [dep.data_runfiles.files for dep in ctx.attr.deps] +
+                     [l.files for l in jsonnet_tla_code_files.keys()],
     )
 
     test_inputs = (
@@ -477,6 +486,7 @@ _jsonnet_compile_attrs = {
         allow_files = True,
     ),
     "ext_strs": attr.string_dict(),
+    "tla_code_files": attr.label_keyed_string_dict(allow_files = True),
     "stamp_keys": attr.string_list(
         default = [],
         mandatory = False,

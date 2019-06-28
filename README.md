@@ -340,6 +340,15 @@ EOF
       </td>
     </tr>
     <tr>
+      <td><code>tla_code_files</code></td>
+      <td>
+        <code>Label-keyed String dict, optional</code>
+        <p>
+          Dict of labels referencing code files and a var name, passed to jsonnet via <code>--tla-code-file var=file</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
       <td><code>yaml_stream</code></td>
       <td>
         <code>bool, optional, default is False</code>

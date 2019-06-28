@@ -90,6 +90,16 @@ jsonnet_to_json_test(
     golden = "extvar_files_golden.json",
 )
 
+jsonnet_to_json_test(
+    name = "tla_code_files_test",
+    size = "small",
+    src = "tla_code_files.jsonnet",
+    tla_code_files = {
+        "tla_code_file_input.json": "tla_file",
+    },
+    golden = "tla_code_files_golden.json",
+)
+
 filegroup(
     name = "test_str_files",
     srcs = [
