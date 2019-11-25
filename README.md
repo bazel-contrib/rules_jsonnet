@@ -264,7 +264,7 @@ local foo = import "foo.jsonnet";
 jsonnet_to_json(
   name = "...",
   ext_strs = {
-    cluster = "{CLUSTER}"
+    "cluster": "{CLUSTER}"
   },
   stamp_keys = ["cluster"]
 )
