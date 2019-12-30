@@ -48,13 +48,13 @@ _JSONNET_FILETYPE = [
     ".json",
 ]
 
-def _add_prefix_to_imports(label, imports):
+def _add_prefix_to_imports(ctx, label, imports):
     imports_prefix = ""
     if label.workspace_root:
         imports_prefix += label.workspace_root + "/"
     if label.package:
         imports_prefix += label.package + "/"
-    return [imports_prefix + im for im in imports]
+    return [imports_prefix + im for im in imports] + [ctx.bin_dir.path + "/" + imports_prefix + im for im in imports]
 
 def _setup_deps(deps):
     """Collects source files and import flags of transitive dependencies.
@@ -84,7 +84,7 @@ def _jsonnet_library_impl(ctx):
     """Implementation of the jsonnet_library rule."""
     depinfo = _setup_deps(ctx.attr.deps)
     sources = depset(ctx.files.srcs, transitive = [depinfo.transitive_sources])
-    imports = depset(_add_prefix_to_imports(ctx.label, ctx.attr.imports), transitive = [depinfo.imports])
+    imports = depset(_add_prefix_to_imports(ctx, ctx.label, ctx.attr.imports), transitive = [depinfo.imports])
     transitive_data = depset(
         transitive = [dep.data_runfiles.files for dep in ctx.attr.deps],
     )
@@ -186,7 +186,7 @@ def _jsonnet_to_json_impl(ctx):
         [
             "set -e;",
             toolchain.jsonnet_path,
-        ] + ["-J %s" % im for im in _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
+        ] + ["-J %s" % im for im in _add_prefix_to_imports(ctx, ctx.label, ctx.attr.imports)] +
         ["-J %s" % im for im in depinfo.imports.to_list()] + [
             "-J .",
             "-J %s" % ctx.genfiles_dir.path,
@@ -344,7 +344,7 @@ def _jsonnet_to_json_test_impl(ctx):
     other_args = ctx.attr.extra_args + (["-y"] if ctx.attr.yaml_stream else [])
     jsonnet_command = " ".join(
         ["OUTPUT=$(%s" % ctx.executable.jsonnet.short_path] +
-        ["-J %s" % im for im in _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
+        ["-J %s" % im for im in _add_prefix_to_imports(ctx, ctx.label, ctx.attr.imports)] +
         ["-J %s" % im for im in depinfo.imports.to_list()] + ["-J ."] +
         other_args +
         ["--ext-str %s=%s" %
