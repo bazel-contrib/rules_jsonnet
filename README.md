@@ -110,6 +110,15 @@ jsonnet_library(name, srcs, deps, imports)
         </p>
       </td>
     </tr>
+    <tr>
+      <td><code>data</code></td>
+      <td>
+        <code>List of strings, optional</code>
+        <p>
+          List of files that are made available to <code>importstr</code>.
+        </p>
+      </td>
+    </tr>
   </tbody>
 </table>
 
