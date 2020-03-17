@@ -15,7 +15,7 @@
 
 These are build rules for working with [Jsonnet][jsonnet] files with Bazel.
 
-[jsonnet]: http://google.github.io/jsonnet/doc/
+[jsonnet]: https://jsonnet.org
 
 ## Setup
 
