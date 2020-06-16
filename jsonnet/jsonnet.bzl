@@ -13,7 +13,7 @@
 # limitations under the License.
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file", "http_jar")
 
 """Jsonnet Rules
 
@@ -182,11 +182,8 @@ def _jsonnet_to_json_impl(ctx):
 
     other_args = ctx.attr.extra_args + (["-y"] if ctx.attr.yaml_stream else [])
 
-    command = (
-        [
-            "set -e;",
-            toolchain.jsonnet_path,
-        ] + ["-J %s" % im for im in _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
+    exec_args = list(
+        ["-J %s" % im for im in _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
         ["-J %s" % im for im in depinfo.imports.to_list()] + [
             "-J .",
             "-J %s" % ctx.genfiles_dir.path,
@@ -215,14 +212,14 @@ def _jsonnet_to_json_impl(ctx):
     # JSON to stdout, which is redirected into a single JSON output file.
     if len(ctx.attr.outs) > 1 or ctx.attr.multiple_outputs:
         outputs += ctx.outputs.outs
-        command += ["-m", ctx.outputs.outs[0].dirname, ctx.file.src.path]
+        exec_args += ["-m", ctx.outputs.outs[0].dirname, ctx.file.src.path]
     elif len(ctx.attr.outs) > 1:
         fail("Only one file can be specified in outs if multiple_outputs is " +
              "not set.")
     else:
         compiled_json = ctx.outputs.outs[0]
         outputs += [compiled_json]
-        command += [ctx.file.src.path, "-o", compiled_json.path]
+        exec_args += [ctx.file.src.path, "-o", compiled_json.path]
 
     transitive_data = depset(transitive = [dep.data_runfiles.files for dep in ctx.attr.deps] +
                                           [l.files for l in jsonnet_tla_code_files.keys()])
@@ -245,15 +242,16 @@ def _jsonnet_to_json_impl(ctx):
         depinfo.transitive_sources.to_list()
     )
 
-    tools = [ctx.executable.jsonnet]
+    # Remove spaces from args, break into multiple args
+    exec_args = " ".join(exec_args).split(" ")
 
-    ctx.actions.run_shell(
+    ctx.actions.run(
         inputs = compile_inputs + stamp_inputs,
-        tools = tools,
+        tools = [ctx.executable.jsonnet],
         outputs = outputs,
         mnemonic = "Jsonnet",
-        command = " ".join(command),
-        use_default_shell_env = True,
+        executable = ctx.executable.jsonnet.path,
+        arguments = exec_args,
         progress_message = "Compiling Jsonnet to JSON for " + ctx.label.name,
     )
 
@@ -416,7 +414,6 @@ _jsonnet_common_attrs = {
         default = Label("//jsonnet:jsonnet_tool"),
         cfg = "host",
         executable = True,
-        allow_single_file = True,
     ),
     "deps": attr.label_list(
         providers = ["transitive_jsonnet_files"],
@@ -813,4 +810,10 @@ def jsonnet_repositories():
         commit = "70a6b3d419d9ee16a144345c35e0305052c6f2d9",  # v0.15.0
         shallow_since = "1581289066 +0100",
         init_submodules = True,
+    )
+    # TODO: Consider building sjsonnet with rules_scala / rules_jvm_external
+    http_jar(
+        name = "sjsonnet",
+        url = "https://github.com/databricks/sjsonnet/releases/download/0.2.4/sjsonnet.jar",
+        sha256 = "956b8afef505dfa0a106b0519eb99602851b06428c8384b39055c6a3a358f685"
     )
