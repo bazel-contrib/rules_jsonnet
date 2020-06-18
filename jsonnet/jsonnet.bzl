@@ -397,12 +397,15 @@ def _jsonnet_to_json_test_impl(ctx):
         stamp_inputs
     )
 
-    return struct(
-        runfiles = ctx.runfiles(
+    self_runfiles = ctx.runfiles(
             files = test_inputs,
             transitive_files = transitive_data,
             collect_data = True,
-        ),
+        )
+    tool_runfiles = ctx.attr.jsonnet[DefaultInfo].default_runfiles
+
+    return struct(
+        runfiles = self_runfiles.merge(tool_runfiles)
     )
 
 _jsonnet_common_attrs = {
