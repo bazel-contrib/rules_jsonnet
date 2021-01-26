@@ -801,16 +801,17 @@ def jsonnet_repositories():
     """Adds the external dependencies needed for the Jsonnet rules."""
     http_archive(
         name = "jsonnet",
-        sha256 = "0b58f2a36a5625c717e717a7e85608730e7bb5bfd8be1765dd6fa23be1f9b9e8",
-        strip_prefix = "jsonnet-0.15.0",
+        sha256 = "076b52edf888c01097010ad4299e3b2e7a72b60a41abbc65af364af1ed3c8dbe",
+        strip_prefix = "jsonnet-0.17.0",
         urls = [
-            "https://github.com/google/jsonnet/archive/v0.15.0.tar.gz",
+            "https://github.com/google/jsonnet/archive/v0.17.0.tar.gz",
         ],
     )
     git_repository(
         name = "jsonnet_go",
         remote = "https://github.com/google/go-jsonnet",
-        commit = "70a6b3d419d9ee16a144345c35e0305052c6f2d9",  # v0.15.0
-        shallow_since = "1581289066 +0100",
+        commit = "0d1d4cb81244b9466c4c93f790acca01d260245e",  # v0.17.0
+        shallow_since = "1606056352 +0100",
         init_submodules = True,
     )
+
