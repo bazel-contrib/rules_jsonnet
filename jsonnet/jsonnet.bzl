@@ -214,8 +214,9 @@ def _jsonnet_to_json_impl(ctx):
     # -m flag for multiple outputs. Otherwise, jsonnet will write the resulting
     # JSON to stdout, which is redirected into a single JSON output file.
     if len(ctx.attr.outs) > 1 or ctx.attr.multiple_outputs:
-        outputs += ctx.outputs.outs
-        command += ["-m", ctx.outputs.outs[0].dirname, ctx.file.src.path]
+        output_manifest = ctx.actions.declare_file("_%s_outs.mf" % ctx.label.name)
+        outputs += ctx.outputs.outs + [output_manifest]
+        command += ["-m", ctx.outputs.outs[0].dirname, ctx.file.src.path, "-o", output_manifest.path]
     elif len(ctx.attr.outs) > 1:
         fail("Only one file can be specified in outs if multiple_outputs is " +
              "not set.")
