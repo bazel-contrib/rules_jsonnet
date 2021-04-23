@@ -171,11 +171,18 @@ def _jsonnet_to_json_impl(ctx):
     jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
     jsonnet_ext_code_files = ctx.files.ext_code_files
     jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
+    jsonnet_tla_strs = ctx.attr.tla_strs
+    jsonnet_tla_str_envs = ctx.attr.tla_str_envs
+    jsonnet_tla_code = ctx.attr.tla_code
+    jsonnet_tla_code_envs = ctx.attr.tla_code_envs
+    jsonnet_tla_str_files = ctx.attr.tla_str_files
     jsonnet_tla_code_files = ctx.attr.tla_code_files
 
     jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, False)
     jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, False)
-    stamp_inputs = strs_stamp_inputs + code_stamp_inputs
+    jsonnet_tla_strs, tla_strs_stamp_inputs = _make_stamp_resolve(ctx.attr.tla_strs, ctx, False)
+    jsonnet_tla_code, tla_code_stamp_inputs = _make_stamp_resolve(ctx.attr.tla_code, ctx, False)
+    stamp_inputs = strs_stamp_inputs + code_stamp_inputs + tla_strs_stamp_inputs + tla_code_stamp_inputs
 
     if ctx.attr.stamp_keys and not stamp_inputs:
         fail("Stamping requested but found no stamp variable to resolve for.")
@@ -204,6 +211,16 @@ def _jsonnet_to_json_impl(ctx):
          (var, jfile.path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
         ["--ext-code-file %s=%s" %
          (var, jfile.path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] +
+        ["--tla-str %s=%s" %
+         (_quote(key), _quote(val)) for key, val in jsonnet_tla_strs.items()] +
+        ["--tla-str '%s'" %
+         tla_str_env for tla_str_env in jsonnet_tla_str_envs] +
+        ["--tla-code %s=%s" %
+         (_quote(key), _quote(val)) for key, val in jsonnet_tla_code.items()] +
+        ["--tla-code %s" %
+         tla_code_env for tla_code_env in jsonnet_tla_code_envs] +
+        ["--tla-str-file %s=%s" %
+         (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_str_files.items()] +
         ["--tla-code-file %s=%s" %
          (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_code_files.items()]
     )
@@ -225,7 +242,8 @@ def _jsonnet_to_json_impl(ctx):
         command += [ctx.file.src.path, "-o", compiled_json.path]
 
     transitive_data = depset(transitive = [dep.data_runfiles.files for dep in ctx.attr.deps] +
-                                          [l.files for l in jsonnet_tla_code_files.keys()])
+                                          [l.files for l in jsonnet_tla_code_files.keys()] +
+                                          [l.files for l in jsonnet_tla_str_files.keys()])
     # NB(sparkprime): (1) transitive_data is never used, since runfiles is only
     # used when .files is pulled from it.  (2) This makes sense - jsonnet does
     # not need transitive dependencies to be passed on the commandline. It
@@ -335,11 +353,16 @@ def _jsonnet_to_json_test_impl(ctx):
     jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
     jsonnet_ext_code_files = ctx.files.ext_code_files
     jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
+    jsonnet_tla_str_envs = ctx.attr.tla_str_envs
+    jsonnet_tla_code_envs = ctx.attr.tla_code_envs
+    jsonnet_tla_str_files = ctx.attr.tla_str_files
     jsonnet_tla_code_files = ctx.attr.tla_code_files
 
     jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, True)
     jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, True)
-    stamp_inputs = strs_stamp_inputs + code_stamp_inputs
+    jsonnet_tla_strs, tla_strs_stamp_inputs = _make_stamp_resolve(ctx.attr.tla_strs, ctx, True)
+    jsonnet_tla_code, tla_code_stamp_inputs = _make_stamp_resolve(ctx.attr.tla_code, ctx, True)
+    stamp_inputs = strs_stamp_inputs + code_stamp_inputs + tla_strs_stamp_inputs + tla_code_stamp_inputs
 
     other_args = ctx.attr.extra_args + (["-y"] if ctx.attr.yaml_stream else [])
     jsonnet_command = " ".join(
@@ -359,6 +382,16 @@ def _jsonnet_to_json_test_impl(ctx):
          (var, jfile.path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
         ["--ext-code-file %s=%s" %
          (var, jfile.path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] +
+        ["--tla-str %s=%s" %
+         (_quote(key), _quote(val)) for key, val in jsonnet_tla_strs.items()] +
+        ["--tla-str '%s'" %
+         tla_str_env for tla_str_env in jsonnet_tla_str_envs] +
+        ["--tla-code %s=%s" %
+         (_quote(key), _quote(val)) for key, val in jsonnet_tla_code.items()] +
+        ["--tla-code %s" %
+         tla_code_env for tla_code_env in jsonnet_tla_code_envs] +
+        ["--tla-str-file %s=%s" %
+         (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_str_files.items()] +
         ["--tla-code-file %s=%s" %
          (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_code_files.items()] +
         [
@@ -387,7 +420,8 @@ def _jsonnet_to_json_test_impl(ctx):
 
     transitive_data = depset(
         transitive = [dep.data_runfiles.files for dep in ctx.attr.deps] +
-                     [l.files for l in jsonnet_tla_code_files.keys()],
+                     [l.files for l in jsonnet_tla_code_files.keys()] +
+                     [l.files for l in jsonnet_tla_str_files.keys()],
     )
 
     test_inputs = (
@@ -487,6 +521,11 @@ _jsonnet_compile_attrs = {
         allow_files = True,
     ),
     "ext_strs": attr.string_dict(),
+    "tla_code": attr.string_dict(),
+    "tla_code_envs": attr.string_list(),
+    "tla_strs": attr.string_dict(),
+    "tla_str_envs": attr.string_list(),
+    "tla_str_files": attr.label_keyed_string_dict(allow_files = True),
     "tla_code_files": attr.label_keyed_string_dict(allow_files = True),
     "stamp_keys": attr.string_list(
         default = [],
@@ -814,4 +853,3 @@ def jsonnet_repositories():
         shallow_since = "1606056352 +0100",
         init_submodules = True,
     )
-

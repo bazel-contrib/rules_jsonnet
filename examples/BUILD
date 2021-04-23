@@ -80,6 +80,26 @@ jsonnet_to_json_test(
 )
 
 jsonnet_to_json_test(
+    name = "tlavar_env_test",
+    size = "small",
+    src = "tlavar_env.jsonnet",
+    golden = "extvar_env_golden.json",
+    tla_code_envs = ["MYJSONNET"],
+    tla_str_envs = ["MYTEST"],
+)
+
+jsonnet_to_json_test(
+    name = "tlavar_str_test",
+    size = "small",
+    src = "tlavar_str.jsonnet",
+    golden = "extvar_str_golden.json",
+    tla_strs = {
+        "str": "sun",
+        "mydefine": "$(mydefine)",
+    },
+)
+
+jsonnet_to_json_test(
     name = "extvar_files_test",
     size = "small",
     src = "extvar_files.jsonnet",
@@ -98,6 +118,16 @@ jsonnet_to_json_test(
         "tla_code_file_input.json": "tla_file",
     },
     golden = "tla_code_files_golden.json",
+)
+
+jsonnet_to_json_test(
+    name = "tla_str_files_test",
+    size = "small",
+    src = "tla_code_files.jsonnet",
+    golden = "tla_str_files_golden.json",
+    tla_str_files = {
+        "file.txt": "tla_file",
+    },
 )
 
 filegroup(
@@ -164,6 +194,26 @@ jsonnet_to_json_test(
         "k8s",
         "complex",
     ],
+)
+
+jsonnet_to_json_test(
+    name = "tlavar_stamp_test",
+    size = "small",
+    src = "tlavar_stamp.jsonnet",
+    golden = "extvar_stamp_golden.json",
+    stamp_keys = [
+        "k8s",
+        "complex",
+    ],
+    tla_code = {
+        "complex": "{COMPLEX_JSON}",
+        "my_json": "{test: 'something'}",
+    },
+    tla_strs = {
+        "non_stamp": "non_stamp",
+        "mydefine": "$(mydefine)",
+        "k8s": "{STABLE_K8S_CLUSTER}",
+    },
 )
 
 jsonnet_to_json_test(

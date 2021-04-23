@@ -360,6 +360,53 @@ EOF
       </td>
     </tr>
     <tr>
+      <td><code>tla_strs</code></td>
+      <td>
+        <code>String dict, optional</code>
+        <p>
+          Map of strings to pass to jsonnet as top-level arguments via <code>--tla-str key=value</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>tla_str_envs</code></td>
+      <td>
+        <code>String list, optional</code>
+        <p>
+          List of env var names containing strings to pass to jsonnet as top-level arguments via <code>--tla-str key</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>tla_code</code></td>
+      <td>
+        <code>String dict, optional</code>
+        <p>
+          Map of code to pass to jsonnet as top-level arguments via
+          <code>--tla-code key=value</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>tla_code_envs</code></td>
+      <td>
+        <code>String list, optional</code>
+        <p>
+          List of env var names containing jsonnet code to pass to jsonnet as top-level arguments via
+          <code>--tla-code key</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>tla_str_files</code></td>
+      <td>
+        <code>Label-keyed String dict, optional</code>
+        <p>
+          Dict of labels referencing text files and a var name, passed to jsonnet via <code>--tla-str-file var=file</code>.
+        </p>
+      </td>
+    </tr>
+    <tr>
       <td><code>tla_code_files</code></td>
       <td>
         <code>Label-keyed String dict, optional</code>
