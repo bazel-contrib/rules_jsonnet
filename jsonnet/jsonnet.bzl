@@ -255,7 +255,7 @@ def _jsonnet_to_json_impl(ctx):
     runfiles = ctx.runfiles(
         collect_data = True,
         files = files,
-        transitive_files = depset(transitive_data),
+        transitive_files = transitive_data,
     )
 
     compile_inputs = (
