@@ -840,16 +840,16 @@ def jsonnet_repositories():
     """Adds the external dependencies needed for the Jsonnet rules."""
     http_archive(
         name = "jsonnet",
-        sha256 = "076b52edf888c01097010ad4299e3b2e7a72b60a41abbc65af364af1ed3c8dbe",
-        strip_prefix = "jsonnet-0.17.0",
+        sha256 = "85c240c4740f0c788c4d49f9c9c0942f5a2d1c2ae58b2c71068107bc80a3ced4",
+        strip_prefix = "jsonnet-0.18.0",
         urls = [
-            "https://github.com/google/jsonnet/archive/v0.17.0.tar.gz",
+            "https://github.com/google/jsonnet/archive/v0.18.0.tar.gz",
         ],
     )
 
     http_archive(
         name = "google_jsonnet_go",
-        sha256 = "4fd04d0c9e38572ef388d28ea6b1ac151b8a9a5026ff94e3a68bdbc18c4db38a",
-        strip_prefix = "go-jsonnet-0.17.0",
-        urls = ["https://github.com/google/go-jsonnet/archive/refs/tags/v0.17.0.tar.gz"],
+        sha256 = "369af561550ba8cff5dd7dd08a771805a38d795da3285221012cf3a2933b363e",
+        strip_prefix = "go-jsonnet-0.18.0",
+        urls = ["https://github.com/google/go-jsonnet/archive/refs/tags/v0.18.0.tar.gz"],
     )
