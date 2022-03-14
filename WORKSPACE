@@ -23,7 +23,7 @@ jsonnet_go_repositories()
 
 load("@google_jsonnet_go//bazel:deps.bzl", "jsonnet_go_dependencies")
 
-jsonnet_go_dependencies()
+jsonnet_go_dependencies(go_sdk_version = "1.17.8")
 
 # Used for documenting Jsonnet rules.
 # TODO: Move this to docs/WORKSPACE when recursive repositories are enabled.
