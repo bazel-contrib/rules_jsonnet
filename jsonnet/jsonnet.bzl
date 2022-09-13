@@ -379,9 +379,9 @@ def _jsonnet_to_json_test_impl(ctx):
         ["--ext-code %s" %
          ext_code_env for ext_code_env in jsonnet_ext_code_envs] +
         ["--ext-str-file %s=%s" %
-         (var, jfile.path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
+         (var, jfile.short_path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
         ["--ext-code-file %s=%s" %
-         (var, jfile.path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] +
+         (var, jfile.short_path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] +
         ["--tla-str %s=%s" %
          (_quote(key), _quote(val)) for key, val in jsonnet_tla_strs.items()] +
         ["--tla-str '%s'" %

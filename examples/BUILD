@@ -100,6 +100,17 @@ jsonnet_to_json_test(
 )
 
 jsonnet_to_json_test(
+    name = "extvar_files_generated_test",
+    size = "small",
+    src = "extvar_files_generated.jsonnet",
+    ext_code_file_vars = ["codefile"],
+    ext_code_files = [":generated.jsonnet"],
+    ext_str_file_vars = ["test"],
+    ext_str_files = [":generated.jsonnet"],
+    golden = "extvar_files_generated_golden.json",
+)
+
+jsonnet_to_json_test(
     name = "extvar_files_test",
     size = "small",
     src = "extvar_files.jsonnet",
