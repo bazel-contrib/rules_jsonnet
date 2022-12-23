@@ -275,7 +275,7 @@ build --workspace_status_command=./print-workspace-status.sh
 $ cat print-workspace-status.sh
 cat &lt;&lt;EOF
 VAR1 value1
-# This can be overriden by users if they "export CLUSTER_OVERRIDE"
+# This can be overridden by users if they "export CLUSTER_OVERRIDE"
 CLUSTER ${CLUSTER_OVERRIDE:-default-value2}
 EOF
 </pre>
