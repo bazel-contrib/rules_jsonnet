@@ -71,13 +71,15 @@ def _setup_deps(deps):
     transitive_sources = []
     imports = []
     for dep in deps:
-        transitive_sources.append(dep.transitive_jsonnet_files)
-        imports.append(dep.imports)
+        transitive_sources.append(dep[JsonnetLibraryInfo].transitive_jsonnet_files)
+        imports.append(dep[JsonnetLibraryInfo].imports)
 
     return struct(
         imports = depset(transitive = imports),
         transitive_sources = depset(transitive = transitive_sources, order = "postorder"),
     )
+
+JsonnetLibraryInfo = provider()
 
 def _jsonnet_library_impl(ctx):
     """Implementation of the jsonnet_library rule."""
@@ -88,15 +90,19 @@ def _jsonnet_library_impl(ctx):
         transitive = [dep.data_runfiles.files for dep in ctx.attr.deps],
     )
 
-    return struct(
-        files = depset(),
-        imports = imports,
-        runfiles = ctx.runfiles(
-            transitive_files = transitive_data,
-            collect_data = True,
+    return [
+        DefaultInfo(
+            files = depset(),
+            runfiles = ctx.runfiles(
+                transitive_files = transitive_data,
+                collect_data = True,
+            ),
         ),
-        transitive_jsonnet_files = sources,
-    )
+        JsonnetLibraryInfo(
+            imports = imports,
+            transitive_jsonnet_files = sources,
+        ),
+    ]
 
 def _jsonnet_toolchain(ctx):
     return struct(
@@ -433,13 +439,13 @@ def _jsonnet_to_json_test_impl(ctx):
         stamp_inputs
     )
 
-    return struct(
+    return [DefaultInfo(
         runfiles = ctx.runfiles(
             files = test_inputs,
             transitive_files = transitive_data,
             collect_data = True,
         ),
-    )
+    )]
 
 _jsonnet_common_attrs = {
     "data": attr.label_list(
@@ -457,7 +463,7 @@ _jsonnet_common_attrs = {
     ),
     "deps": attr.label_list(
         doc = "List of targets that are required by the `srcs` Jsonnet files.",
-        providers = ["transitive_jsonnet_files"],
+        providers = [JsonnetLibraryInfo],
         allow_files = False,
     ),
 }
