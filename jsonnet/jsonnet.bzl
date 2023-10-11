@@ -451,7 +451,7 @@ _jsonnet_common_attrs = {
     "jsonnet": attr.label(
         doc = "A jsonnet binary",
         default = Label("//jsonnet:jsonnet_tool"),
-        cfg = "host",
+        cfg = "exec",
         executable = True,
         allow_single_file = True,
     ),
@@ -546,7 +546,7 @@ _jsonnet_compile_attrs = {
     ),
     "_stamper": attr.label(
         default = Label("//jsonnet:stamper"),
-        cfg = "host",
+        cfg = "exec",
         executable = True,
         allow_files = True,
     ),
