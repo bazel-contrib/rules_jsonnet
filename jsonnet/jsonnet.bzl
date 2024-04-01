@@ -47,13 +47,28 @@ _JSONNET_FILETYPE = [
     ".json",
 ]
 
-def _add_prefix_to_imports(label, imports):
-    imports_prefix = ""
+def _add_prefix_for_workspace(label, item):
+    prefix = ""
     if label.workspace_root:
-        imports_prefix += label.workspace_root + "/"
+        prefix += label.workspace_root + "/"
+    return prefix + item
+
+def _add_suffix_for_workspace(label, item):
+    suffix = ""
+    if label.workspace_root:
+        suffix += "/" + label.workspace_root
+    return item + suffix
+
+def _add_prefix_for_source(label, item):
+    prefix = ""
+    if label.workspace_root:
+        prefix += label.workspace_root + "/"
     if label.package:
-        imports_prefix += label.package + "/"
-    return [imports_prefix + im for im in imports]
+        prefix += label.package + "/"
+    return prefix + item
+
+def _add_prefix_to_imports(label, imports):
+    return [_add_prefix_for_source(label, im) for im in imports]
 
 def _setup_deps(deps):
     """Collects source files and import flags of transitive dependencies.
@@ -200,9 +215,9 @@ def _jsonnet_to_json_impl(ctx):
             toolchain.jsonnet_path,
         ] + ["-J %s" % im for im in _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
         ["-J %s" % im for im in depinfo.imports.to_list()] + [
-            "-J .",
-            "-J %s" % ctx.genfiles_dir.path,
-            "-J %s" % ctx.bin_dir.path,
+            "-J %s" % _add_prefix_for_workspace(ctx.label, "."),
+            "-J %s" % _add_suffix_for_workspace(ctx.label, ctx.genfiles_dir.path),
+            "-J %s" % _add_suffix_for_workspace(ctx.label, ctx.bin_dir.path),
         ] + other_args +
         ["--ext-str %s=%s" %
          (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
@@ -452,7 +467,9 @@ _jsonnet_common_attrs = {
         allow_files = True,
     ),
     "imports": attr.string_list(
-        doc = "List of import `-J` flags to be passed to the `jsonnet` compiler.",
+        doc = """List of import `-J` flags to be passed to the `jsonnet` compiler.
+
+The workspace_root, the genfiles_dir, and bin_dir are always included.""",
     ),
     "jsonnet": attr.label(
         doc = "A jsonnet binary",
