@@ -143,10 +143,7 @@ jsonnet_to_json_test(
 
 filegroup(
     name = "test_str_files",
-    srcs = [
-        "WORKSPACE",
-        "file.txt",
-    ],
+    srcs = ["file.txt"],
 )
 
 filegroup(
@@ -166,10 +163,7 @@ jsonnet_to_json_test(
         "codefile2",
     ],
     ext_code_files = [":test_code_files"],
-    ext_str_file_vars = [
-        "0-workspace",
-        "1-test",
-    ],
+    ext_str_file_vars = ["1-test"],
     ext_str_files = [":test_str_files"],
     golden = "extvar_filegroup_golden.json",
 )
