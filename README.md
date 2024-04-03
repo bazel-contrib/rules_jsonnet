@@ -19,15 +19,22 @@ These are build rules for working with [Jsonnet][jsonnet] files with Bazel.
 
 ## Setup
 
-To use the Jsonnet rules, add the following to your `WORKSPACE` file to add the
-external repositories for Jsonnet:
+To use the Jsonnet rules, add the following to your `MODULE.bazel` file:
+
+```python
+bazel_dep(name = "rules_jsonnet", version = "0.5.0")
+```
+
+If you are using an older version of Bazel that does not support Bzlmod,
+add the following to your `WORKSPACE` file to add the external
+repositories for Jsonnet:
 
 ```python
 http_archive(
     name = "io_bazel_rules_jsonnet",
-    sha256 = "d20270872ba8d4c108edecc9581e2bb7f320afab71f8caa2f6394b5202e8a2c3",
-    strip_prefix = "rules_jsonnet-0.4.0",
-    urls = ["https://github.com/bazelbuild/rules_jsonnet/archive/0.4.0.tar.gz"],
+    sha256 = "c51ba0dba41d667fa5c64e56e252ba54be093e5ae764af6470dabca901f373eb",
+    strip_prefix = "rules_jsonnet-0.5.0",
+    urls = ["https://github.com/bazelbuild/rules_jsonnet/archive/0.5.0.tar.gz"],
 )
 load("@io_bazel_rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_repositories")
 
