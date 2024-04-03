@@ -1,16 +1,22 @@
 ---
-platforms:
-  ubuntu1804:
+matrix:
+  platform:
+  - ubuntu2204
+  - macos
+
+tasks:
+  rules_jsonnet:
+    name: rules_jsonnet
+    platform: ${{ platform }}
     build_targets:
-    - "//..."
-    - "@examples//..."
+    - //...
+
+  examples:
+    name: examples
+    platform: ${{ platform }}
+    working_directory: examples
+    test_flags:
+    - --define
+    - jsonnet_port=${{ jsonnet_port }}
     test_targets:
-    - "//..."
-    - "@examples//..."
-  macos:
-    build_targets:
-    - "//..."
-    - "@examples//..."
-    test_targets:
-    - "//..."
-    - "@examples//..."
+    - //...
