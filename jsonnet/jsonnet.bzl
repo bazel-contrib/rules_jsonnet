@@ -16,7 +16,7 @@
 
 These are build rules for working with [Jsonnet][jsonnet] files with Bazel.
 
-[jsonnet]: http://google.github.io/jsonnet/doc/
+[jsonnet]: https://jsonnet.org/
 
 ## Setup
 
@@ -705,7 +705,7 @@ Example:
   )
   ```
 
-  [multiple-output-files]: http://google.github.io/jsonnet/doc/commandline.html
+  [multiple-output-files]: https://jsonnet.org/learning/getting_started.html#multi
 """,
 )
 

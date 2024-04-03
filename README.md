@@ -534,7 +534,7 @@ jsonnet_to_json(
 )
 ```
 
-[multiple-output-files]: http://google.github.io/jsonnet/doc/commandline.html
+[multiple-output-files]: https://jsonnet.org/learning/getting_started.html#multi
 
 <a name="#jsonnet_to_json_test"></a>
 ## jsonnet\_to\_json\_test
