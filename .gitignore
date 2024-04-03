@@ -1,3 +1,3 @@
-/bazel-*
+bazel-*
 # These files are not determinstic/stable, so don't check them in for now.
 MODULE.bazel.lock

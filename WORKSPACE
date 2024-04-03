@@ -3,16 +3,10 @@ workspace(name = "io_bazel_rules_jsonnet")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 local_repository(
-    name = "examples",
-    path = "examples",
-)
-
-local_repository(
     name = "docs",
     path = "docs",
 )
 
-# TODO: Move this to examples/WORKSPACE when recursive repositories are enabled.
 load("//jsonnet:jsonnet.bzl", "jsonnet_repositories")
 
 jsonnet_repositories()

@@ -4,11 +4,7 @@ package(default_visibility = ["//visibility:public"])
 # for jsonnet rules.  The BUILD rules should not contain any jsonnet_to_json
 # rules as this is redundant with jsonnet_to_json_test rules.
 
-load(
-    "@io_bazel_rules_jsonnet//jsonnet:jsonnet.bzl",
-    "jsonnet_library",
-    "jsonnet_to_json_test",
-)
+load("@rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_library", "jsonnet_to_json_test")
 
 jsonnet_library(
     name = "workflow",
