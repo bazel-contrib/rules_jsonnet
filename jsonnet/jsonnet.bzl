@@ -221,7 +221,7 @@ def _jsonnet_to_json_impl(ctx):
             toolchain.jsonnet_path,
         ] +
         ["-J " + shell.quote(im) for im in _get_import_paths(ctx.label, [ctx.file.src], ctx.attr.imports)] +
-        ["-J " % shell.quote(im) for im in depinfo.imports.to_list()] +
+        ["-J " + shell.quote(im) for im in depinfo.imports.to_list()] +
         other_args +
         ["--ext-str %s=%s" %
          (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
