@@ -11,6 +11,16 @@ tasks:
     build_targets:
     - //...
 
+  docs:
+    name: docs
+    platform: ${{ platform }}
+    working_directory: docs
+    test_flags:
+    - --define
+    - jsonnet_port=${{ jsonnet_port }}
+    test_targets:
+    - //...
+
   examples:
     name: examples
     platform: ${{ platform }}
