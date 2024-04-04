@@ -335,7 +335,7 @@ GOLDEN=$(%s %s)
 if [ "$OUTPUT" != "$GOLDEN" ]; then
   echo "FAIL (output mismatch): %s"
   echo "Diff:"
-  diff <(echo "$GOLDEN") <(echo "$OUTPUT")
+  diff -u <(echo "$GOLDEN") <(echo "$OUTPUT")
   if [ %s = true ]; then
     echo "Expected: $GOLDEN"
     echo "Actual: $OUTPUT"
