@@ -20,22 +20,34 @@ These are build rules for working with [Jsonnet][jsonnet] files with Bazel.
 
 ## Setup
 
-To use the Jsonnet rules, add the following to your `WORKSPACE` file to add the
-external repositories for Jsonnet:
+To use the Jsonnet rules, add the following to your `MODULE.bazel` file:
+
+```python
+bazel_dep(name = "rules_jsonnet", version = "0.5.0")
+```
+
+If you are using an older version of Bazel that does not support Bzlmod,
+add the following to your `WORKSPACE` file to add the external
+repositories for Jsonnet:
 
 ```python
 http_archive(
     name = "io_bazel_rules_jsonnet",
-    urls = [
-        "http://mirror.bazel.build/github.com/bazelbuild/rules_jsonnet/archive/0.0.2.tar.gz",
-        "https://github.com/bazelbuild/rules_jsonnet/archive/0.0.2.tar.gz",
-    ],
-    sha256 = "5f788c7719a02ed2483641365f194e9e5340fbe54963d6d6caa09f91454d38b8",
-    strip_prefix = "rules_jsonnet-0.0.2",
+    sha256 = "c51ba0dba41d667fa5c64e56e252ba54be093e5ae764af6470dabca901f373eb",
+    strip_prefix = "rules_jsonnet-0.5.0",
+    urls = ["https://github.com/bazelbuild/rules_jsonnet/archive/0.5.0.tar.gz"],
 )
 load("@io_bazel_rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_repositories")
 
 jsonnet_repositories()
+
+load("@google_jsonnet_go//bazel:repositories.bzl", "jsonnet_go_repositories")
+
+jsonnet_go_repositories()
+
+load("@google_jsonnet_go//bazel:deps.bzl", "jsonnet_go_dependencies")
+
+jsonnet_go_dependencies()
 ```
 """
 
