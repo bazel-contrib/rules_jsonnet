@@ -251,10 +251,20 @@ def _jsonnet_to_json_impl(ctx):
 
     outputs = []
 
-    # If multiple_outputs is set to true, then jsonnet will be invoked with the
-    # -m flag for multiple outputs. Otherwise, jsonnet will write the resulting
-    # JSON to stdout, which is redirected into a single JSON output file.
-    if len(ctx.attr.outs) > 1 or ctx.attr.multiple_outputs:
+    if (ctx.attr.outs or ctx.attr.multiple_outputs) and ctx.attr.out_dir:
+        fail("The \"outs\" and \"multiple_outputs\" attributes are " +
+             "incompatible with \"out_dir\".")
+
+    # If multiple_outputs or out_dir is set, then jsonnet will be
+    # invoked with the -m flag for multiple outputs. Otherwise, jsonnet
+    # will write the resulting JSON to stdout, which is redirected into
+    # a single JSON output file.
+    if ctx.attr.out_dir:
+        output_manifest = ctx.actions.declare_file("_%s_outs.mf" % ctx.label.name)
+        out_dir = ctx.actions.declare_directory(ctx.attr.out_dir)
+        outputs += [out_dir, output_manifest]
+        command += [ctx.file.src.path, "-c", "-m", out_dir.path, "-o", output_manifest.path]
+    elif len(ctx.attr.outs) > 1 or ctx.attr.multiple_outputs:
         output_manifest = ctx.actions.declare_file("_%s_outs.mf" % ctx.label.name)
         outputs += ctx.outputs.outs + [output_manifest]
         command += ["-m", ctx.outputs.outs[0].dirname, ctx.file.src.path, "-o", output_manifest.path]
@@ -299,6 +309,12 @@ def _jsonnet_to_json_impl(ctx):
         use_default_shell_env = True,
         progress_message = "Compiling Jsonnet to JSON for " + ctx.label.name,
     )
+
+    if ctx.attr.out_dir:
+        return [DefaultInfo(
+            files = depset([out_dir]),
+            runfiles = ctx.runfiles(files = [out_dir]),
+        )]
 
 _EXIT_CODE_COMPARE_COMMAND = """
 EXIT_CODE=$?
@@ -594,8 +610,9 @@ specified in your `src` Jsonnet file.
 For the case where multiple file output is used but only for generating one
 output file, set the `multiple_outputs` attribute to 1 to explicitly enable
 the `-m` flag for multiple file output.
+
+This attribute is incompatible with `out_dir`.
 """,
-        mandatory = True,
     ),
     "multiple_outputs": attr.bool(
         doc = """\
@@ -611,6 +628,19 @@ local foo = import "foo.jsonnet";
     "foo.json": foo,
 }
 ```
+
+This attribute is incompatible with `out_dir`.
+""",
+    ),
+    "out_dir": attr.string(
+        doc = """\
+Name of the directory where output files are stored.
+
+If the names of output files are not known up front, this option can be
+used to write all output files to a single directory artifact. Files in
+this directory cannot be referenced individually.
+
+This attribute is incompatible with `outs` and `multiple_outputs`.
 """,
     ),
 }

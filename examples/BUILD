@@ -267,3 +267,9 @@ jsonnet_to_json_test(
         "@other_module//:world",
     ],
 )
+
+jsonnet_to_json(
+    name = "out_dir",
+    src = "out_dir.jsonnet",
+    out_dir = "out_dir.output",
+)
