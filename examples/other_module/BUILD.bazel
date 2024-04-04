@@ -1,0 +1,19 @@
+load("@rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_library")
+
+jsonnet_library(
+    name = "hello",
+    srcs = ["hello.jsonnet"],
+    visibility = ["//visibility:public"],
+)
+
+genrule(
+    name = "world_src",
+    outs = ["world.jsonnet"],
+    cmd = "echo \\'world\\' > $@",
+)
+
+jsonnet_library(
+    name = "world",
+    srcs = ["world.jsonnet"],
+    visibility = ["//visibility:public"],
+)

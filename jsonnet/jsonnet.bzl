@@ -51,6 +51,8 @@ jsonnet_go_dependencies()
 ```
 """
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 _JSONNET_FILETYPE = [
@@ -59,13 +61,17 @@ _JSONNET_FILETYPE = [
     ".json",
 ]
 
-def _add_prefix_to_imports(label, imports):
-    imports_prefix = ""
-    if label.workspace_root:
-        imports_prefix += label.workspace_root + "/"
-    if label.package:
-        imports_prefix += label.package + "/"
-    return [imports_prefix + im for im in imports]
+def _get_import_paths(label, files, imports):
+    return [
+        # Implicitly add the workspace root as an import path.
+        paths.join(".", file.root.path, label.workspace_root)
+        for file in files
+    ] + [
+        # Explicitly provided import paths.
+        paths.join(".", file.root.path, label.workspace_root, label.package, im)
+        for file in files
+        for im in imports
+    ]
 
 def _setup_deps(deps):
     """Collects source files and import flags of transitive dependencies.
@@ -97,7 +103,10 @@ def _jsonnet_library_impl(ctx):
     """Implementation of the jsonnet_library rule."""
     depinfo = _setup_deps(ctx.attr.deps)
     sources = depset(ctx.files.srcs, transitive = [depinfo.transitive_sources])
-    imports = depset(_add_prefix_to_imports(ctx.label, ctx.attr.imports), transitive = [depinfo.imports])
+    imports = depset(
+        _get_import_paths(ctx.label, ctx.files.srcs, ctx.attr.imports),
+        transitive = [depinfo.imports],
+    )
     transitive_data = depset(
         transitive = [dep.data_runfiles.files for dep in ctx.attr.deps],
     )
@@ -210,12 +219,10 @@ def _jsonnet_to_json_impl(ctx):
         [
             "set -e;",
             toolchain.jsonnet_path,
-        ] + ["-J %s" % im for im in _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
-        ["-J %s" % im for im in depinfo.imports.to_list()] + [
-            "-J .",
-            "-J %s" % ctx.genfiles_dir.path,
-            "-J %s" % ctx.bin_dir.path,
-        ] + other_args +
+        ] +
+        ["-J " + shell.quote(im) for im in _get_import_paths(ctx.label, [ctx.file.src], ctx.attr.imports)] +
+        ["-J " % shell.quote(im) for im in depinfo.imports.to_list()] +
+        other_args +
         ["--ext-str %s=%s" %
          (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
         ["--ext-str '%s'" %
@@ -385,8 +392,8 @@ def _jsonnet_to_json_test_impl(ctx):
     other_args = ctx.attr.extra_args + (["-y"] if ctx.attr.yaml_stream else [])
     jsonnet_command = " ".join(
         ["OUTPUT=$(%s" % ctx.executable.jsonnet.short_path] +
-        ["-J %s" % im for im in _add_prefix_to_imports(ctx.label, ctx.attr.imports)] +
-        ["-J %s" % im for im in depinfo.imports.to_list()] + ["-J ."] +
+        ["-J " + shell.quote(im) for im in _get_import_paths(ctx.label, [ctx.file.src], ctx.attr.imports)] +
+        ["-J " + shell.quote(im) for im in depinfo.imports.to_list()] +
         other_args +
         ["--ext-str %s=%s" %
          (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +

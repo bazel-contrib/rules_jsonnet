@@ -247,3 +247,15 @@ jsonnet_to_json_test(
     output_file_contents = False,
     deps = [":workflow"],
 )
+
+jsonnet_to_json_test(
+    name = "other_module_test",
+    src = "other_module.jsonnet",
+    canonicalize_golden = False,
+    extra_args = ["--string"],
+    golden = "other_module_golden.txt",
+    deps = [
+        "@other_module//:hello",
+        "@other_module//:world",
+    ],
+)

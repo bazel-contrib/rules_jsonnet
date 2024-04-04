@@ -10,8 +10,12 @@ bzl_library(
 bzl_library(
     name = "jsonnet",
     srcs = ["jsonnet.bzl"],
-    deps = [":bzl_srcs"],
     visibility = ["//visibility:public"],
+    deps = [
+        ":bzl_srcs",
+        "@bazel_skylib//lib:paths",
+        "@bazel_skylib//lib:shell",
+    ],
 )
 
 py_binary(
