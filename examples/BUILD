@@ -121,10 +121,10 @@ jsonnet_to_json_test(
     name = "tla_code_files_test",
     size = "small",
     src = "tla_code_files.jsonnet",
+    golden = "tla_code_files_golden.json",
     tla_code_files = {
         "tla_code_file_input.json": "tla_file",
     },
-    golden = "tla_code_files_golden.json",
 )
 
 jsonnet_to_json_test(
@@ -235,15 +235,15 @@ jsonnet_to_json_test(
 jsonnet_to_json_test(
     name = "strings_test",
     src = "strings.jsonnet",
-    golden = "strings_golden.txt",
-    extra_args = ["--string"],
     canonicalize_golden = False,
+    extra_args = ["--string"],
+    golden = "strings_golden.txt",
 )
 
 jsonnet_to_json_test(
     name = "output_file_contents_smoke_test",
     src = "wordcount.jsonnet",
     golden = "wordcount_golden.json",
-    deps = [":workflow"],
     output_file_contents = False,
+    deps = [":workflow"],
 )
