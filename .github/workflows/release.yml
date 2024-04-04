@@ -35,4 +35,4 @@ jobs:
           generate_release_notes: true
           body_path: release_notes.txt
           fail_on_unmatched_files: true
-          files: rules_python-*.tar.gz
+          files: rules_jsonnet-*.tar.gz
