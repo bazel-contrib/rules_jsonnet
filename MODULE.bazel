@@ -1,6 +1,6 @@
 module(
     name = "rules_jsonnet",
-    version = "0.5.0",
+    version = "0.6.0",
     repo_name = "io_bazel_rules_jsonnet",
 )
 
