@@ -225,7 +225,7 @@ Example:
 | <a id="jsonnet_to_json-ext_str_file_vars"></a>ext_str_file_vars |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-ext_str_files"></a>ext_str_files |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="jsonnet_to_json-ext_strs"></a>ext_strs |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
-| <a id="jsonnet_to_json-extra_args"></a>extra_args |  -   | List of strings | optional |  `[]`  |
+| <a id="jsonnet_to_json-extra_args"></a>extra_args |  Additional command line arguments for the Jsonnet interpreter.<br><br>For example, setting this argument to `["--string"]` causes the interpreter to manifest the output file(s) as plain text instead of JSON.   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-imports"></a>imports |  List of import `-J` flags to be passed to the `jsonnet` compiler.   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-jsonnet"></a>jsonnet |  A jsonnet binary   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@rules_jsonnet//jsonnet:jsonnet_tool"`  |
 | <a id="jsonnet_to_json-multiple_outputs"></a>multiple_outputs |  Set to `True` to explicitly enable multiple file output via the `jsonnet -m` flag.<br><br>This is used for the case where multiple file output is used but only for generating a single output file. For example:<br><br><pre><code>local foo = import "foo.jsonnet";&#10;&#10;{&#10;    "foo.json": foo,&#10;}</code></pre><br><br>This attribute is incompatible with `out_dir`.   | Boolean | optional |  `False`  |
@@ -372,7 +372,7 @@ Example:
 | <a id="jsonnet_to_json_test-ext_str_file_vars"></a>ext_str_file_vars |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-ext_str_files"></a>ext_str_files |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-ext_strs"></a>ext_strs |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
-| <a id="jsonnet_to_json_test-extra_args"></a>extra_args |  -   | List of strings | optional |  `[]`  |
+| <a id="jsonnet_to_json_test-extra_args"></a>extra_args |  Additional command line arguments for the Jsonnet interpreter.<br><br>For example, setting this argument to `["--string"]` causes the interpreter to manifest the output file(s) as plain text instead of JSON.   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-golden"></a>golden |  The expected (combined stdout and stderr) output to compare to the output of running `jsonnet` on `src`.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="jsonnet_to_json_test-imports"></a>imports |  List of import `-J` flags to be passed to the `jsonnet` compiler.   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-jsonnet"></a>jsonnet |  A jsonnet binary   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@rules_jsonnet//jsonnet:jsonnet_tool"`  |

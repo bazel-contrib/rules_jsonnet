@@ -581,7 +581,13 @@ _jsonnet_compile_attrs = {
         default = False,
         mandatory = False,
     ),
-    "extra_args": attr.string_list(),
+    "extra_args": attr.string_list(
+        doc = """Additional command line arguments for the Jsonnet interpreter.
+
+For example, setting this argument to `["--string"]` causes the interpreter to
+manifest the output file(s) as plain text instead of JSON.
+""",
+    ),
     "vars": attr.string_dict(
         doc = "Deprecated (use 'ext_strs').",
     ),
