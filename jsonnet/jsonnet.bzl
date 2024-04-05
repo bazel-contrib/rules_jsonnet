@@ -242,7 +242,9 @@ def _jsonnet_to_json_impl(ctx):
         # directory name that is shared by all output files.
         base_dirname = ctx.outputs.outs[0].dirname.split("/")
         for output in ctx.outputs.outs[1:]:
-            for i, (part1, part2) in enumerate(zip(base_dirname, output.dirname.split("/"))):
+            component_pairs = zip(base_dirname, output.dirname.split("/"))
+            base_dirname = base_dirname[:len(component_pairs)]
+            for i, (part1, part2) in enumerate(component_pairs):
                 if part1 != part2:
                     base_dirname = base_dirname[:i]
                     break

@@ -291,3 +291,12 @@ jsonnet_to_json(
         "nested/dir2/file2.json",
     ],
 )
+
+jsonnet_to_json(
+    name = "multiple_outs_nested_asymmetric",
+    src = "multiple_outs_nested_asymmetric.jsonnet",
+    outs = [
+        "multiple_outs_nested_asymmetric/aaaaa/file.json",
+        "multiple_outs_nested_asymmetric/file.json",
+    ],
+)
