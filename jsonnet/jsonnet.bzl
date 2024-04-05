@@ -238,9 +238,18 @@ def _jsonnet_to_json_impl(ctx):
         outputs += [out_dir, output_manifest]
         command += [ctx.file.src.path, "-c", "-m", out_dir.path, "-o", output_manifest.path]
     elif len(ctx.attr.outs) > 1 or ctx.attr.multiple_outputs:
+        # Assume that the output directory is the leading part of the
+        # directory name that is shared by all output files.
+        base_dirname = ctx.outputs.outs[0].dirname.split("/")
+        for output in ctx.outputs.outs[1:]:
+            for i, (part1, part2) in enumerate(zip(base_dirname, output.dirname.split("/"))):
+                if part1 != part2:
+                    base_dirname = base_dirname[:i]
+                    break
+
         output_manifest = ctx.actions.declare_file("_%s_outs.mf" % ctx.label.name)
         outputs += ctx.outputs.outs + [output_manifest]
-        command += ["-m", ctx.outputs.outs[0].dirname, ctx.file.src.path, "-o", output_manifest.path]
+        command += ["-m", "/".join(base_dirname), ctx.file.src.path, "-o", output_manifest.path]
     elif len(ctx.attr.outs) > 1:
         fail("Only one file can be specified in outs if multiple_outputs is " +
              "not set.")

@@ -273,3 +273,21 @@ jsonnet_to_json(
     src = "out_dir.jsonnet",
     out_dir = "out_dir.output",
 )
+
+jsonnet_to_json(
+    name = "multiple_outs_toplevel",
+    src = "multiple_outs.jsonnet",
+    outs = [
+        "dir1/file1.json",
+        "dir2/file2.json",
+    ],
+)
+
+jsonnet_to_json(
+    name = "multiple_outs_nested",
+    src = "multiple_outs.jsonnet",
+    outs = [
+        "nested/dir1/file1.json",
+        "nested/dir2/file2.json",
+    ],
+)
