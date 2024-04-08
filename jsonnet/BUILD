@@ -1,6 +1,7 @@
+load(":toolchain.bzl", "jsonnet_toolchain")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
-exports_files(["jsonnet.bzl"])
+exports_files(["docs.bzl", "jsonnet.bzl", "toolchain.bzl"])
 
 bzl_library(
     name = "bzl_srcs",
@@ -8,8 +9,12 @@ bzl_library(
 )
 
 bzl_library(
-    name = "jsonnet",
-    srcs = ["jsonnet.bzl"],
+    name = "docs",
+    srcs = [
+        "docs.bzl",
+        "jsonnet.bzl",
+        "toolchain.bzl",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         ":bzl_srcs",
@@ -25,25 +30,46 @@ py_binary(
     visibility = ["//visibility:public"],
 )
 
-config_setting(
-    name = "port_cpp",
-    define_values = {
-        "jsonnet_port": "cpp",
-    },
+toolchain_type(name = "toolchain_type")
+
+jsonnet_toolchain(
+    name = "rust_jsonnet",
+    compiler = "@crates//:jrsonnet__jrsonnet",
+    create_directory_flags = ["-c"],
+    manifest_file_support = False,
 )
 
-config_setting(
-    name = "port_go",
-    define_values = {
-        "jsonnet_port": "go",
-    },
+jsonnet_toolchain(
+    name = "go_jsonnet",
+    compiler = "@google_jsonnet_go//cmd/jsonnet",
+    create_directory_flags = ["-c"],
+    manifest_file_support = True,
 )
 
-alias(
-    name = "jsonnet_tool",
-    actual = select({
-        "//jsonnet:port_cpp": "@jsonnet//cmd:jsonnet",
-        "//conditions:default": "@google_jsonnet_go//cmd/jsonnet",
-    }),
+jsonnet_toolchain(
+    name = "cpp_jsonnet",
+    compiler = "@jsonnet//cmd:jsonnet",
+    create_directory_flags = [],
+    manifest_file_support = True,
+)
+
+toolchain(
+    name = "rust_jsonnet_toolchain",
+    toolchain = ":rust_jsonnet",
+    toolchain_type = ":toolchain_type",
+    visibility = ["//visibility:public"],
+)
+
+toolchain(
+    name = "go_jsonnet_toolchain",
+    toolchain = ":go_jsonnet",
+    toolchain_type = ":toolchain_type",
+    visibility = ["//visibility:public"],
+)
+
+toolchain(
+    name = "cpp_jsonnet_toolchain",
+    toolchain = ":cpp_jsonnet",
+    toolchain_type = ":toolchain_type",
     visibility = ["//visibility:public"],
 )

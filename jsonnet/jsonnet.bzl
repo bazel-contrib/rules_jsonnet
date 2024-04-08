@@ -11,19 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""Jsonnet Rules
-
-These are build rules for working with [Jsonnet][jsonnet] files with Bazel.
-
-[jsonnet]: https://jsonnet.org/
-
-## Setup
-
-To use the Jsonnet rules as part of your Bazel project, please follow the
-instructions on [the releases page](https://github.com/bazelbuild/rules_jsonnet/releases).
-"""
-
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
@@ -98,11 +85,6 @@ def _jsonnet_library_impl(ctx):
         ),
     ]
 
-def _jsonnet_toolchain(ctx):
-    return struct(
-        jsonnet_path = ctx.executable.jsonnet.path,
-    )
-
 def _quote(s):
     return '"' + s.replace('"', '\\"') + '"'
 
@@ -146,7 +128,7 @@ def _make_stamp_resolve(ext_vars, ctx, relative = True):
                     val = "$(cat %s)" % stamp_file.short_path
                 else:
                     val = "$(cat %s)" % stamp_file.path
-                stamp_inputs += [stamp_file]
+                stamp_inputs.append(stamp_file)
 
         results[key] = val
 
@@ -161,7 +143,6 @@ def _jsonnet_to_json_impl(ctx):
         print("'code_vars' attribute is deprecated, please use 'ext_code'.")
 
     depinfo = _setup_deps(ctx.attr.deps)
-    toolchain = _jsonnet_toolchain(ctx)
     jsonnet_ext_strs = ctx.attr.ext_strs or ctx.attr.vars
     jsonnet_ext_str_envs = ctx.attr.ext_str_envs
     jsonnet_ext_code = ctx.attr.ext_code or ctx.attr.code_vars
@@ -191,7 +172,7 @@ def _jsonnet_to_json_impl(ctx):
     command = (
         [
             "set -e;",
-            toolchain.jsonnet_path,
+            ctx.toolchains["//jsonnet:toolchain_type"].jsonnetinfo.compiler.path,
         ] +
         ["-J " + shell.quote(im) for im in _get_import_paths(ctx.label, [ctx.file.src], ctx.attr.imports)] +
         ["-J " + shell.quote(im) for im in depinfo.imports.to_list()] +
@@ -233,10 +214,15 @@ def _jsonnet_to_json_impl(ctx):
     # will write the resulting JSON to stdout, which is redirected into
     # a single JSON output file.
     if ctx.attr.out_dir:
-        output_manifest = ctx.actions.declare_file("_%s_outs.mf" % ctx.label.name)
+        if ctx.toolchains["//jsonnet:toolchain_type"].jsonnetinfo.manifest_file_support:
+            output_manifest = ctx.actions.declare_file("_%s_outs.mf" % ctx.label.name)
+            outputs.append(output_manifest)
+            command += ["-o", output_manifest.path]
+
         out_dir = ctx.actions.declare_directory(ctx.attr.out_dir)
-        outputs += [out_dir, output_manifest]
-        command += [ctx.file.src.path, "-c", "-m", out_dir.path, "-o", output_manifest.path]
+        outputs.append(out_dir)
+        command += [ctx.file.src.path, "-m", out_dir.path]
+        command += ctx.toolchains["//jsonnet:toolchain_type"].jsonnetinfo.create_directory_flags
     elif len(ctx.attr.outs) > 1 or ctx.attr.multiple_outputs:
         # Assume that the output directory is the leading part of the
         # directory name that is shared by all output files.
@@ -248,16 +234,20 @@ def _jsonnet_to_json_impl(ctx):
                 if part1 != part2:
                     base_dirname = base_dirname[:i]
                     break
+        if ctx.toolchains["//jsonnet:toolchain_type"].jsonnetinfo.manifest_file_support:
+            output_manifest = ctx.actions.declare_file("_%s_outs.mf" % ctx.label.name)
+            outputs.append(output_manifest)
+            command += ["-o", output_manifest.path]
 
-        output_manifest = ctx.actions.declare_file("_%s_outs.mf" % ctx.label.name)
-        outputs += ctx.outputs.outs + [output_manifest]
-        command += ["-m", "/".join(base_dirname), ctx.file.src.path, "-o", output_manifest.path]
+        outputs += ctx.outputs.outs
+        command += ["-m", "/".join(base_dirname), ctx.file.src.path]
+        command += ctx.toolchains["//jsonnet:toolchain_type"].jsonnetinfo.create_directory_flags
     elif len(ctx.attr.outs) > 1:
         fail("Only one file can be specified in outs if multiple_outputs is " +
              "not set.")
     else:
         compiled_json = ctx.outputs.outs[0]
-        outputs += [compiled_json]
+        outputs.append(compiled_json)
         command += [ctx.file.src.path, "-o", compiled_json.path]
 
     transitive_data = depset(transitive = [dep.data_runfiles.files for dep in ctx.attr.deps] +
@@ -282,11 +272,10 @@ def _jsonnet_to_json_impl(ctx):
         depinfo.transitive_sources.to_list()
     )
 
-    tools = [ctx.executable.jsonnet]
-
     ctx.actions.run_shell(
         inputs = compile_inputs + stamp_inputs,
-        tools = tools,
+        toolchain = Label("//jsonnet:toolchain_type"),
+        tools = [ctx.toolchains["//jsonnet:toolchain_type"].jsonnetinfo.compiler],
         outputs = outputs,
         mnemonic = "Jsonnet",
         command = " ".join(command),
@@ -299,6 +288,11 @@ def _jsonnet_to_json_impl(ctx):
             files = depset([out_dir]),
             runfiles = ctx.runfiles(files = [out_dir]),
         )]
+
+    return [DefaultInfo(
+        files = depset([]),
+        runfiles = ctx.runfiles(files = []),
+    )]
 
 _EXIT_CODE_COMPARE_COMMAND = """
 EXIT_CODE=$?
@@ -329,6 +323,10 @@ fi
 """
 
 _REGEX_DIFF_COMMAND = """
+# Needed due to rust-jsonnet, go-jsonnet and cpp-jsonnet producing different
+# output (casing, text etc).
+shopt -s nocasematch
+
 GOLDEN_REGEX=$(%s %s)
 if [[ ! "$OUTPUT" =~ $GOLDEN_REGEX ]]; then
   echo "FAIL (regex mismatch): %s"
@@ -342,12 +340,11 @@ fi
 def _jsonnet_to_json_test_impl(ctx):
     """Implementation of the jsonnet_to_json_test rule."""
     depinfo = _setup_deps(ctx.attr.deps)
-    toolchain = _jsonnet_toolchain(ctx)
 
     golden_files = []
     diff_command = ""
     if ctx.file.golden:
-        golden_files += [ctx.file.golden]
+        golden_files.append(ctx.file.golden)
 
         # Note that we only run jsonnet to canonicalize the golden output if the
         # expected return code is 0, and canonicalize_golden was not explicitly disabled.
@@ -356,7 +353,7 @@ def _jsonnet_to_json_test_impl(ctx):
 
         # For legacy reasons, we also disable canonicalize_golden for yaml_streams.
         canonicalize = not (ctx.attr.yaml_stream or not ctx.attr.canonicalize_golden)
-        dump_golden_cmd = (ctx.executable.jsonnet.short_path if ctx.attr.error == 0 and canonicalize else "/bin/cat")
+        dump_golden_cmd = (ctx.toolchains["//jsonnet:toolchain_type"].jsonnetinfo.compiler.short_path if ctx.attr.error == 0 and canonicalize else "/bin/cat")
         if ctx.attr.regex:
             diff_command = _REGEX_DIFF_COMMAND % (
                 dump_golden_cmd,
@@ -391,7 +388,7 @@ def _jsonnet_to_json_test_impl(ctx):
 
     other_args = ctx.attr.extra_args + (["-y"] if ctx.attr.yaml_stream else [])
     jsonnet_command = " ".join(
-        ["OUTPUT=$(%s" % ctx.executable.jsonnet.short_path] +
+        ["OUTPUT=$(%s" % ctx.toolchains["//jsonnet:toolchain_type"].jsonnetinfo.compiler.short_path] +
         ["-J " + shell.quote(im) for im in _get_import_paths(ctx.label, [ctx.file.src], ctx.attr.imports)] +
         ["-J " + shell.quote(im) for im in depinfo.imports.to_list()] +
         other_args +
@@ -435,7 +432,7 @@ def _jsonnet_to_json_test_impl(ctx):
         ),
     ]
     if diff_command:
-        command += [diff_command]
+        command.append(diff_command)
 
     ctx.actions.write(
         output = ctx.outputs.executable,
@@ -450,7 +447,11 @@ def _jsonnet_to_json_test_impl(ctx):
     )
 
     test_inputs = (
-        [ctx.file.src, ctx.executable.jsonnet] + golden_files +
+        [
+            ctx.file.src,
+            ctx.toolchains["//jsonnet:toolchain_type"].jsonnetinfo.compiler,
+        ] +
+        golden_files +
         transitive_data.to_list() +
         depinfo.transitive_sources.to_list() +
         jsonnet_ext_str_files +
@@ -472,13 +473,6 @@ _jsonnet_common_attrs = {
     ),
     "imports": attr.string_list(
         doc = "List of import `-J` flags to be passed to the `jsonnet` compiler.",
-    ),
-    "jsonnet": attr.label(
-        doc = "A jsonnet binary",
-        default = Label("//jsonnet:jsonnet_tool"),
-        cfg = "exec",
-        executable = True,
-        allow_single_file = True,
     ),
     "deps": attr.label_list(
         doc = "List of targets that are required by the `srcs` Jsonnet files.",
@@ -640,6 +634,7 @@ jsonnet_to_json = rule(
     attrs = dict(_jsonnet_compile_attrs.items() +
                  _jsonnet_to_json_attrs.items() +
                  _jsonnet_common_attrs.items()),
+    toolchains = ["//jsonnet:toolchain_type"],
     doc = """\
 Compiles Jsonnet code to JSON.
 
@@ -774,6 +769,7 @@ jsonnet_to_json_test = rule(
     attrs = dict(_jsonnet_compile_attrs.items() +
                  _jsonnet_to_json_test_attrs.items() +
                  _jsonnet_common_attrs.items()),
+    toolchains = ["//jsonnet:toolchain_type"],
     executable = True,
     test = True,
     doc = """\

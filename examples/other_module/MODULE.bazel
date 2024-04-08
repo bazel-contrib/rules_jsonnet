@@ -4,3 +4,6 @@ module(
 )
 
 bazel_dep(name = "rules_jsonnet", version = "0.0.0")
+
+jsonnet = use_extension("@rules_jsonnet//jsonnet:extensions.bzl", "jsonnet")
+jsonnet.compiler(name = "rust")

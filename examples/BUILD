@@ -1,10 +1,10 @@
+load("@rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_library", "jsonnet_to_json", "jsonnet_to_json_test")
+
 package(default_visibility = ["//visibility:public"])
 
 # This directory contains unit and regression tests that also serve as examples
 # for jsonnet rules.  The BUILD rules should not contain any jsonnet_to_json
 # rules as this is redundant with jsonnet_to_json_test rules.
-
-load("@rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_library", "jsonnet_to_json", "jsonnet_to_json_test")
 
 jsonnet_library(
     name = "workflow",

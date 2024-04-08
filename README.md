@@ -22,17 +22,56 @@ These are build rules for working with [Jsonnet][jsonnet] files with Bazel.
 To use the Jsonnet rules as part of your Bazel project, please follow the
 instructions on [the releases page](https://github.com/bazelbuild/rules_jsonnet/releases).
 
-## Jsonnet Port Selection
+## Jsonnet Compiler Selection
 
-By default, Bazel will use [the Go port](https://github.com/google/go-jsonnet) of Jsonnet. To use [the C++ port](https://github.com/google/jsonnet) of Jsonnet instead, invoke Bazel with the `--define jsonnet_port=cpp` command-line flag. To select the Go port explicitly, invoke Bazel with the `--define jsonnet_port=go` command-line flag.
+By default for Bzlmod, Bazel will use the [Go
+compiler](https://github.com/google/go-jsonnet). Note that the
+primary development focus of the Jsonnet project is now with the Go compiler.
+This repository's support for using the C++ compiler is deprecated, and may be
+removed in a future release.
 
-_bazel_ Flag | Jsonnet Port
------------- | ------------
-(none)                     | Go
-`--define jsonnet_port=cpp`| C++
-`--define jsonnet_port=go` | Go
+To use [the
+C++](https://github.com/google/jsonnet) or
+[Rust](https://github.com/CertainLach/jrsonnet) compiler of Jsonnet instead,
+register a different compiler:
 
-Note that the primary development focus of the Jsonnet project is now with the Go port. This repository's support for using the C++ port is deprecated, and may be removed in a future release.
+| Jsonnet compiler | MODULE.bazel directive            | WORKSPACE directive                                                              |
+| ---------------- | --------------------------------- | -------------------------------------------------------------------------------- |
+| Go               | `jsonnet.compiler(name = "go")`   | `register_toolchains("@io_bazel_rules_jsonnet//jsonnet:go_jsonnet_toolchain")`   |
+| cpp              | `jsonnet.compiler(name = "cpp")`  | `register_toolchains("@io_bazel_rules_jsonnet//jsonnet:cpp_jsonnet_toolchain")`  |
+| Rust             | `jsonnet.compiler(name = "rust")` | `register_toolchains("@io_bazel_rules_jsonnet//jsonnet:rust_jsonnet_toolchain")` |
+
+Note that `WORKSPACE` users must register a toolchain manually, using the table
+above as reference.
+
+### Rust Jsonnet Compiler
+
+To use the Rust Jsonnet compiler a `Nightly` Rust version for the host tools is
+required because `-Z bindeps` is needed to compile the Jrsonnet binary.
+
+Add the following snippet to the `Module.bazel` file:
+
+```Starlark
+bazel_dep(name = "rules_rust", version = "0.45.1")
+
+rust_host = use_extension("@rules_rust//rust:extensions.bzl", "rust_host_tools")
+rust_host.host_tools(
+    version = "nightly/2024-05-02",
+)
+```
+
+### CLI
+
+Use the `--extra_toolchains` flag to pass the preferred toolchain to the bazel
+invocation:
+
+```bash
+bazel build //... --extra_toolchains=@rules_jsonnet//jsonnet:cpp_jsonnet_toolchain
+
+bazel test //... --extra_toolchains=@rules_jsonnet//jsonnet:rust_jsonnet_toolchain
+
+bazel run //... --extra_toolchains=@rules_jsonnet//jsonnet:go_jsonnet_toolchain
+```
 
 <a name="#jsonnet_library"></a>
 ## jsonnet_library

@@ -1,0 +1,13 @@
+# This module 'other_toolchain_module' is here to test multiple modules
+# providing different toolchains and the logic in the toolchain conflict
+# resolution logic.
+
+module(
+    name = "other_toolchain_module",
+    version = "0.0.0",
+)
+
+bazel_dep(name = "rules_jsonnet", version = "0.0.0")
+
+jsonnet = use_extension("@rules_jsonnet//jsonnet:extensions.bzl", "jsonnet")
+jsonnet.compiler(name = "rust")

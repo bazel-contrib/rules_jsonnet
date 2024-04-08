@@ -58,5 +58,7 @@ jsonnet_go_repositories()
 load("@google_jsonnet_go//bazel:deps.bzl", "jsonnet_go_dependencies")
 
 jsonnet_go_dependencies()
+
+register_toolchains("@io_bazel_rules_jsonnet//jsonnet:go_jsonnet_toolchain")
 \`\`\`
 EOF

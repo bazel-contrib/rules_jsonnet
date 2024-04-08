@@ -9,8 +9,24 @@ local_path_override(
     path = "..",
 )
 
+jsonnet = use_extension("@rules_jsonnet//jsonnet:extensions.bzl", "jsonnet")
+jsonnet.compiler(name = "go")
+
 bazel_dep(name = "other_module", version = "0.0.0")
 local_path_override(
     module_name = "other_module",
     path = "other_module",
+)
+
+bazel_dep(name = "other_toolchain_module", version = "0.0.0")
+local_path_override(
+    module_name = "other_toolchain_module",
+    path = "other_toolchain_module",
+)
+
+bazel_dep(name = "rules_rust", version = "0.45.1")
+
+rust_host = use_extension("@rules_rust//rust:extensions.bzl", "rust_host_tools")
+rust_host.host_tools(
+    version = "nightly/2024-05-02",
 )

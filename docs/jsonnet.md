@@ -1,6 +1,6 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-Jsonnet Rules
+# Jsonnet Rules
 
 These are build rules for working with [Jsonnet][jsonnet] files with Bazel.
 
@@ -16,7 +16,7 @@ instructions on [the releases page](https://github.com/bazelbuild/rules_jsonnet/
 ## jsonnet_library
 
 <pre>
-jsonnet_library(<a href="#jsonnet_library-name">name</a>, <a href="#jsonnet_library-deps">deps</a>, <a href="#jsonnet_library-srcs">srcs</a>, <a href="#jsonnet_library-data">data</a>, <a href="#jsonnet_library-imports">imports</a>, <a href="#jsonnet_library-jsonnet">jsonnet</a>)
+jsonnet_library(<a href="#jsonnet_library-name">name</a>, <a href="#jsonnet_library-deps">deps</a>, <a href="#jsonnet_library-srcs">srcs</a>, <a href="#jsonnet_library-data">data</a>, <a href="#jsonnet_library-imports">imports</a>)
 </pre>
 
 Creates a logical set of Jsonnet files.
@@ -60,7 +60,6 @@ Example:
 | <a id="jsonnet_library-srcs"></a>srcs |  List of `.jsonnet` files that comprises this Jsonnet library   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="jsonnet_library-data"></a>data |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="jsonnet_library-imports"></a>imports |  List of import `-J` flags to be passed to the `jsonnet` compiler.   | List of strings | optional |  `[]`  |
-| <a id="jsonnet_library-jsonnet"></a>jsonnet |  A jsonnet binary   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@rules_jsonnet//jsonnet:jsonnet_tool"`  |
 
 
 <a id="jsonnet_to_json"></a>
@@ -70,7 +69,7 @@ Example:
 <pre>
 jsonnet_to_json(<a href="#jsonnet_to_json-name">name</a>, <a href="#jsonnet_to_json-deps">deps</a>, <a href="#jsonnet_to_json-src">src</a>, <a href="#jsonnet_to_json-data">data</a>, <a href="#jsonnet_to_json-outs">outs</a>, <a href="#jsonnet_to_json-code_vars">code_vars</a>, <a href="#jsonnet_to_json-ext_code">ext_code</a>, <a href="#jsonnet_to_json-ext_code_envs">ext_code_envs</a>, <a href="#jsonnet_to_json-ext_code_file_vars">ext_code_file_vars</a>,
                 <a href="#jsonnet_to_json-ext_code_files">ext_code_files</a>, <a href="#jsonnet_to_json-ext_str_envs">ext_str_envs</a>, <a href="#jsonnet_to_json-ext_str_file_vars">ext_str_file_vars</a>, <a href="#jsonnet_to_json-ext_str_files">ext_str_files</a>, <a href="#jsonnet_to_json-ext_strs">ext_strs</a>, <a href="#jsonnet_to_json-extra_args">extra_args</a>,
-                <a href="#jsonnet_to_json-imports">imports</a>, <a href="#jsonnet_to_json-jsonnet">jsonnet</a>, <a href="#jsonnet_to_json-multiple_outputs">multiple_outputs</a>, <a href="#jsonnet_to_json-out_dir">out_dir</a>, <a href="#jsonnet_to_json-stamp_keys">stamp_keys</a>, <a href="#jsonnet_to_json-tla_code">tla_code</a>, <a href="#jsonnet_to_json-tla_code_envs">tla_code_envs</a>,
+                <a href="#jsonnet_to_json-imports">imports</a>, <a href="#jsonnet_to_json-multiple_outputs">multiple_outputs</a>, <a href="#jsonnet_to_json-out_dir">out_dir</a>, <a href="#jsonnet_to_json-stamp_keys">stamp_keys</a>, <a href="#jsonnet_to_json-tla_code">tla_code</a>, <a href="#jsonnet_to_json-tla_code_envs">tla_code_envs</a>,
                 <a href="#jsonnet_to_json-tla_code_files">tla_code_files</a>, <a href="#jsonnet_to_json-tla_str_envs">tla_str_envs</a>, <a href="#jsonnet_to_json-tla_str_files">tla_str_files</a>, <a href="#jsonnet_to_json-tla_strs">tla_strs</a>, <a href="#jsonnet_to_json-vars">vars</a>, <a href="#jsonnet_to_json-yaml_stream">yaml_stream</a>)
 </pre>
 
@@ -200,7 +199,6 @@ Example:
 | <a id="jsonnet_to_json-ext_strs"></a>ext_strs |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_to_json-extra_args"></a>extra_args |  Additional command line arguments for the Jsonnet interpreter.<br><br>For example, setting this argument to `["--string"]` causes the interpreter to manifest the output file(s) as plain text instead of JSON.   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-imports"></a>imports |  List of import `-J` flags to be passed to the `jsonnet` compiler.   | List of strings | optional |  `[]`  |
-| <a id="jsonnet_to_json-jsonnet"></a>jsonnet |  A jsonnet binary   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@rules_jsonnet//jsonnet:jsonnet_tool"`  |
 | <a id="jsonnet_to_json-multiple_outputs"></a>multiple_outputs |  Set to `True` to explicitly enable multiple file output via the `jsonnet -m` flag.<br><br>This is used for the case where multiple file output is used but only for generating a single output file. For example:<br><br><pre><code>local foo = import "foo.jsonnet";&#10;&#10;{&#10;    "foo.json": foo,&#10;}</code></pre><br><br>This attribute is incompatible with `out_dir`.   | Boolean | optional |  `False`  |
 | <a id="jsonnet_to_json-out_dir"></a>out_dir |  Name of the directory where output files are stored.<br><br>If the names of output files are not known up front, this option can be used to write all output files to a single directory artifact. Files in this directory cannot be referenced individually.<br><br>This attribute is incompatible with `outs` and `multiple_outputs`.   | String | optional |  `""`  |
 | <a id="jsonnet_to_json-stamp_keys"></a>stamp_keys |  -   | List of strings | optional |  `[]`  |
@@ -221,7 +219,7 @@ Example:
 <pre>
 jsonnet_to_json_test(<a href="#jsonnet_to_json_test-name">name</a>, <a href="#jsonnet_to_json_test-deps">deps</a>, <a href="#jsonnet_to_json_test-src">src</a>, <a href="#jsonnet_to_json_test-data">data</a>, <a href="#jsonnet_to_json_test-canonicalize_golden">canonicalize_golden</a>, <a href="#jsonnet_to_json_test-code_vars">code_vars</a>, <a href="#jsonnet_to_json_test-error">error</a>, <a href="#jsonnet_to_json_test-ext_code">ext_code</a>,
                      <a href="#jsonnet_to_json_test-ext_code_envs">ext_code_envs</a>, <a href="#jsonnet_to_json_test-ext_code_file_vars">ext_code_file_vars</a>, <a href="#jsonnet_to_json_test-ext_code_files">ext_code_files</a>, <a href="#jsonnet_to_json_test-ext_str_envs">ext_str_envs</a>,
-                     <a href="#jsonnet_to_json_test-ext_str_file_vars">ext_str_file_vars</a>, <a href="#jsonnet_to_json_test-ext_str_files">ext_str_files</a>, <a href="#jsonnet_to_json_test-ext_strs">ext_strs</a>, <a href="#jsonnet_to_json_test-extra_args">extra_args</a>, <a href="#jsonnet_to_json_test-golden">golden</a>, <a href="#jsonnet_to_json_test-imports">imports</a>, <a href="#jsonnet_to_json_test-jsonnet">jsonnet</a>,
+                     <a href="#jsonnet_to_json_test-ext_str_file_vars">ext_str_file_vars</a>, <a href="#jsonnet_to_json_test-ext_str_files">ext_str_files</a>, <a href="#jsonnet_to_json_test-ext_strs">ext_strs</a>, <a href="#jsonnet_to_json_test-extra_args">extra_args</a>, <a href="#jsonnet_to_json_test-golden">golden</a>, <a href="#jsonnet_to_json_test-imports">imports</a>,
                      <a href="#jsonnet_to_json_test-output_file_contents">output_file_contents</a>, <a href="#jsonnet_to_json_test-regex">regex</a>, <a href="#jsonnet_to_json_test-stamp_keys">stamp_keys</a>, <a href="#jsonnet_to_json_test-tla_code">tla_code</a>, <a href="#jsonnet_to_json_test-tla_code_envs">tla_code_envs</a>, <a href="#jsonnet_to_json_test-tla_code_files">tla_code_files</a>,
                      <a href="#jsonnet_to_json_test-tla_str_envs">tla_str_envs</a>, <a href="#jsonnet_to_json_test-tla_str_files">tla_str_files</a>, <a href="#jsonnet_to_json_test-tla_strs">tla_strs</a>, <a href="#jsonnet_to_json_test-vars">vars</a>, <a href="#jsonnet_to_json_test-yaml_stream">yaml_stream</a>)
 </pre>
@@ -348,7 +346,6 @@ Example:
 | <a id="jsonnet_to_json_test-extra_args"></a>extra_args |  Additional command line arguments for the Jsonnet interpreter.<br><br>For example, setting this argument to `["--string"]` causes the interpreter to manifest the output file(s) as plain text instead of JSON.   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-golden"></a>golden |  The expected (combined stdout and stderr) output to compare to the output of running `jsonnet` on `src`.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
 | <a id="jsonnet_to_json_test-imports"></a>imports |  List of import `-J` flags to be passed to the `jsonnet` compiler.   | List of strings | optional |  `[]`  |
-| <a id="jsonnet_to_json_test-jsonnet"></a>jsonnet |  A jsonnet binary   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `"@rules_jsonnet//jsonnet:jsonnet_tool"`  |
 | <a id="jsonnet_to_json_test-output_file_contents"></a>output_file_contents |  -   | Boolean | optional |  `True`  |
 | <a id="jsonnet_to_json_test-regex"></a>regex |  Set to 1 if `golden` contains a regex used to match the output of running `jsonnet` on `src`.   | Boolean | optional |  `False`  |
 | <a id="jsonnet_to_json_test-stamp_keys"></a>stamp_keys |  -   | List of strings | optional |  `[]`  |
@@ -362,29 +359,24 @@ Example:
 | <a id="jsonnet_to_json_test-yaml_stream"></a>yaml_stream |  -   | Boolean | optional |  `False`  |
 
 
-<a id="JsonnetLibraryInfo"></a>
+<a id="jsonnet_toolchain"></a>
 
-## JsonnetLibraryInfo
-
-<pre>
-JsonnetLibraryInfo()
-</pre>
-
-
-
-**FIELDS**
-
-
-
-<a id="jsonnet_repositories"></a>
-
-## jsonnet_repositories
+## jsonnet_toolchain
 
 <pre>
-jsonnet_repositories()
+jsonnet_toolchain(<a href="#jsonnet_toolchain-name">name</a>, <a href="#jsonnet_toolchain-compiler">compiler</a>, <a href="#jsonnet_toolchain-create_directory_flags">create_directory_flags</a>, <a href="#jsonnet_toolchain-manifest_file_support">manifest_file_support</a>)
 </pre>
 
-Adds the external dependencies needed for the Jsonnet rules.
+The Jsonnet compiler information.
 
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="jsonnet_toolchain-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="jsonnet_toolchain-compiler"></a>compiler |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
+| <a id="jsonnet_toolchain-create_directory_flags"></a>create_directory_flags |  The flags passed to the Jsonnet compiler when a directory must be created.   | List of strings | required |  |
+| <a id="jsonnet_toolchain-manifest_file_support"></a>manifest_file_support |  If the Jsonnet compiler supports writing the output filenames to a manifest file.   | Boolean | required |  |
 
 
