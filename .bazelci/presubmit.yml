@@ -3,10 +3,6 @@ matrix:
   platform:
   - ubuntu2204
   - macos
-  toolchain:
-  - "@rules_jsonnet//jsonnet:go_jsonnet_toolchain"
-  - "@rules_jsonnet//jsonnet:cpp_jsonnet_toolchain"
-  - "@rules_jsonnet//jsonnet:rust_jsonnet_toolchain"
 
 tasks:
   rules_jsonnet:
@@ -19,16 +15,32 @@ tasks:
     name: docs
     platform: ${{ platform }}
     working_directory: docs
-    test_flags:
-    - "--extra_toolchains=${{ toolchain }}"
     test_targets:
     - //...
 
-  examples:
+  examples_go:
     name: examples
     platform: ${{ platform }}
     working_directory: examples
     test_flags:
-    - "--extra_toolchains=${{ toolchain }}"
+    - "--extra_toolchains=@rules_jsonnet//jsonnet:go_jsonnet_toolchain"
+    test_targets:
+    - //...
+
+  examples_cpp:
+    name: examples
+    platform: ${{ platform }}
+    working_directory: examples
+    test_flags:
+    - "--extra_toolchains=@rules_jsonnet//jsonnet:cpp_jsonnet_toolchain"
+    test_targets:
+    - //...
+
+  examples_rust:
+    name: examples
+    platform: ${{ platform }}
+    working_directory: examples
+    test_flags:
+    - "--extra_toolchains=@rules_jsonnet//jsonnet:rust_jsonnet_toolchain"
     test_targets:
     - //...
