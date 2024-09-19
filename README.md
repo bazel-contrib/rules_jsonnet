@@ -72,5 +72,5 @@ bazel run //... --extra_toolchains=@rules_jsonnet//jsonnet:go_jsonnet_toolchain
 
 ## Rule usage
 
-Please refer to [the StarDoc generated documentation](docs/docs.md) for
-instructions on how to use these rules.
+Please refer to [the StarDoc generated documentation](docs/jsonnet.md)
+for instructions on how to use these rules.
