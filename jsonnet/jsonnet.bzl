@@ -499,7 +499,7 @@ Example:
 
   ```
   [workspace]/
-      WORKSPACE
+      MODULE.bazel
       configs/
           BUILD
           backend.jsonnet
@@ -645,7 +645,7 @@ Example:
 
   ```
   [workspace]/
-      WORKSPACE
+      MODULE.bazel
       workflows/
           BUILD
           workflow.libsonnet
@@ -780,7 +780,7 @@ Example:
 
   ```
   [workspace]/
-      WORKSPACE
+      MODULE.bazel
       config/
           BUILD
           base_config.libsonnet
@@ -829,7 +829,7 @@ Example:
 
   ```
   [workspace]/
-      WORKSPACE
+      MODULE.bazel
       config/
           BUILD
           base_config.libsonnet
