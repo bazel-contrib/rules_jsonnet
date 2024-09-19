@@ -35,14 +35,11 @@ C++](https://github.com/google/jsonnet) or
 [Rust](https://github.com/CertainLach/jrsonnet) compiler of Jsonnet instead,
 register a different compiler:
 
-| Jsonnet compiler | MODULE.bazel directive            | WORKSPACE directive                                                              |
-| ---------------- | --------------------------------- | -------------------------------------------------------------------------------- |
-| Go               | `jsonnet.compiler(name = "go")`   | `register_toolchains("@io_bazel_rules_jsonnet//jsonnet:go_jsonnet_toolchain")`   |
-| cpp              | `jsonnet.compiler(name = "cpp")`  | `register_toolchains("@io_bazel_rules_jsonnet//jsonnet:cpp_jsonnet_toolchain")`  |
-| Rust             | `jsonnet.compiler(name = "rust")` | `register_toolchains("@io_bazel_rules_jsonnet//jsonnet:rust_jsonnet_toolchain")` |
-
-Note that `WORKSPACE` users must register a toolchain manually, using the table
-above as reference.
+| Jsonnet compiler | MODULE.bazel directive            |
+| ---------------- | --------------------------------- |
+| Go               | `jsonnet.compiler(name = "go")`   |
+| cpp              | `jsonnet.compiler(name = "cpp")`  |
+| Rust             | `jsonnet.compiler(name = "rust")` |
 
 ### Rust Jsonnet Compiler
 

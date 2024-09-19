@@ -22,7 +22,6 @@ TAG=${GITHUB_REF_NAME}
 PREFIX="rules_jsonnet-${TAG}"
 ARCHIVE="rules_jsonnet-$TAG.tar.gz"
 git archive --format=tar --prefix=${PREFIX}/ ${TAG} | gzip > $ARCHIVE
-SHA=$(shasum -a 256 $ARCHIVE | awk '{print $1}')
 
 cat > release_notes.txt << EOF
 ## Setup
@@ -31,34 +30,5 @@ To use the Jsonnet rules, add the following to your \`MODULE.bazel\` file:
 
 \`\`\`starlark
 bazel_dep(name = "rules_jsonnet", version = "${TAG}")
-\`\`\`
-
-If you are using an older version of Bazel that does not support Bzlmod,
-add the following to your \`WORKSPACE\` file to add the external
-repositories for Jsonnet:
-
-\`\`\`starlark
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-http_archive(
-    name = "io_bazel_rules_jsonnet",
-    sha256 = "${SHA}",
-    strip_prefix = "${PREFIX}",
-    urls = ["https://github.com/bazelbuild/rules_jsonnet/releases/download/${TAG}/rules_jsonnet-${TAG}.tar.gz",
-)
-
-load("@io_bazel_rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_repositories")
-
-jsonnet_repositories()
-
-load("@google_jsonnet_go//bazel:repositories.bzl", "jsonnet_go_repositories")
-
-jsonnet_go_repositories()
-
-load("@google_jsonnet_go//bazel:deps.bzl", "jsonnet_go_dependencies")
-
-jsonnet_go_dependencies()
-
-register_toolchains("@io_bazel_rules_jsonnet//jsonnet:go_jsonnet_toolchain")
 \`\`\`
 EOF
