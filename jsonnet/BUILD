@@ -41,7 +41,7 @@ jsonnet_toolchain(
 
 jsonnet_toolchain(
     name = "go_jsonnet",
-    compiler = "@google_jsonnet_go//cmd/jsonnet",
+    compiler = "@jsonnet_go//cmd/jsonnet",
     create_directory_flags = ["-c"],
     manifest_file_support = True,
 )

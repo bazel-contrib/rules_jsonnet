@@ -54,7 +54,7 @@ def _jsonnet_toolchain_repo_impl(ctx):
         content = """
 alias(
     name = "toolchain",
-    actual = "@io_bazel_rules_jsonnet//jsonnet:%s_jsonnet_toolchain",
+    actual = "@rules_jsonnet//jsonnet:%s_jsonnet_toolchain",
 )
 """ % ctx.attr.compiler,
         executable = False,

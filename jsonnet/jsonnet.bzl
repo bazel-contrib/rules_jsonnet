@@ -511,7 +511,7 @@ Example:
   `configs/BUILD`:
 
   ```python
-  load("@io_bazel_rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_library")
+  load("@rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_library")
 
   jsonnet_library(
       name = "configs",
@@ -662,7 +662,7 @@ Example:
   `workflows/BUILD`:
 
   ```python
-  load("@io_bazel_rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_library")
+  load("@rules_jsonnet//jsonnet:jsonnet.bzl", "jsonnet_library")
 
   jsonnet_library(
       name = "workflow",
@@ -802,7 +802,7 @@ Example:
 
   ```python
   load(
-      "@io_bazel_rules_jsonnet//jsonnet:jsonnet.bzl",
+      "@rules_jsonnet//jsonnet:jsonnet.bzl",
       "jsonnet_library",
       "jsonnet_to_json_test",
   )
@@ -850,7 +850,7 @@ Example:
 
   ```python
   load(
-      "@io_bazel_rules_jsonnet//jsonnet:jsonnet.bzl",
+      "@rules_jsonnet//jsonnet:jsonnet.bzl",
       "jsonnet_library",
       "jsonnet_to_json_test",
   )
