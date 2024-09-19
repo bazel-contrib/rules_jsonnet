@@ -16,6 +16,8 @@ instructions on [the releases page](https://github.com/bazelbuild/rules_jsonnet/
 ## jsonnet_library
 
 <pre>
+load("@rules_jsonnet//jsonnet:docs.bzl", "jsonnet_library")
+
 jsonnet_library(<a href="#jsonnet_library-name">name</a>, <a href="#jsonnet_library-deps">deps</a>, <a href="#jsonnet_library-srcs">srcs</a>, <a href="#jsonnet_library-data">data</a>, <a href="#jsonnet_library-imports">imports</a>)
 </pre>
 
@@ -67,6 +69,8 @@ Example:
 ## jsonnet_to_json
 
 <pre>
+load("@rules_jsonnet//jsonnet:docs.bzl", "jsonnet_to_json")
+
 jsonnet_to_json(<a href="#jsonnet_to_json-name">name</a>, <a href="#jsonnet_to_json-deps">deps</a>, <a href="#jsonnet_to_json-src">src</a>, <a href="#jsonnet_to_json-data">data</a>, <a href="#jsonnet_to_json-outs">outs</a>, <a href="#jsonnet_to_json-code_vars">code_vars</a>, <a href="#jsonnet_to_json-ext_code">ext_code</a>, <a href="#jsonnet_to_json-ext_code_envs">ext_code_envs</a>, <a href="#jsonnet_to_json-ext_code_file_vars">ext_code_file_vars</a>,
                 <a href="#jsonnet_to_json-ext_code_files">ext_code_files</a>, <a href="#jsonnet_to_json-ext_str_envs">ext_str_envs</a>, <a href="#jsonnet_to_json-ext_str_file_vars">ext_str_file_vars</a>, <a href="#jsonnet_to_json-ext_str_files">ext_str_files</a>, <a href="#jsonnet_to_json-ext_strs">ext_strs</a>, <a href="#jsonnet_to_json-extra_args">extra_args</a>,
                 <a href="#jsonnet_to_json-imports">imports</a>, <a href="#jsonnet_to_json-multiple_outputs">multiple_outputs</a>, <a href="#jsonnet_to_json-out_dir">out_dir</a>, <a href="#jsonnet_to_json-stamp_keys">stamp_keys</a>, <a href="#jsonnet_to_json-tla_code">tla_code</a>, <a href="#jsonnet_to_json-tla_code_envs">tla_code_envs</a>,
@@ -217,6 +221,8 @@ Example:
 ## jsonnet_to_json_test
 
 <pre>
+load("@rules_jsonnet//jsonnet:docs.bzl", "jsonnet_to_json_test")
+
 jsonnet_to_json_test(<a href="#jsonnet_to_json_test-name">name</a>, <a href="#jsonnet_to_json_test-deps">deps</a>, <a href="#jsonnet_to_json_test-src">src</a>, <a href="#jsonnet_to_json_test-data">data</a>, <a href="#jsonnet_to_json_test-canonicalize_golden">canonicalize_golden</a>, <a href="#jsonnet_to_json_test-code_vars">code_vars</a>, <a href="#jsonnet_to_json_test-error">error</a>, <a href="#jsonnet_to_json_test-ext_code">ext_code</a>,
                      <a href="#jsonnet_to_json_test-ext_code_envs">ext_code_envs</a>, <a href="#jsonnet_to_json_test-ext_code_file_vars">ext_code_file_vars</a>, <a href="#jsonnet_to_json_test-ext_code_files">ext_code_files</a>, <a href="#jsonnet_to_json_test-ext_str_envs">ext_str_envs</a>,
                      <a href="#jsonnet_to_json_test-ext_str_file_vars">ext_str_file_vars</a>, <a href="#jsonnet_to_json_test-ext_str_files">ext_str_files</a>, <a href="#jsonnet_to_json_test-ext_strs">ext_strs</a>, <a href="#jsonnet_to_json_test-extra_args">extra_args</a>, <a href="#jsonnet_to_json_test-golden">golden</a>, <a href="#jsonnet_to_json_test-imports">imports</a>,
@@ -364,6 +370,8 @@ Example:
 ## jsonnet_toolchain
 
 <pre>
+load("@rules_jsonnet//jsonnet:docs.bzl", "jsonnet_toolchain")
+
 jsonnet_toolchain(<a href="#jsonnet_toolchain-name">name</a>, <a href="#jsonnet_toolchain-compiler">compiler</a>, <a href="#jsonnet_toolchain-create_directory_flags">create_directory_flags</a>, <a href="#jsonnet_toolchain-manifest_file_support">manifest_file_support</a>)
 </pre>
 
