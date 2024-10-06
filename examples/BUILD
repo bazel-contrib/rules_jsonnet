@@ -240,6 +240,19 @@ jsonnet_to_json_test(
     deps = ["//imports:a"],
 )
 
+jsonnet_library(
+    name = "imports_default_output",
+    srcs = [":imports_build"],
+)
+
+jsonnet_to_json_test(
+    name = "imports_default_output_test",
+    src = "imports_default_output.jsonnet",
+    golden = "imports_golden.json",
+    imports = ["imports"],
+    deps = [":imports_default_output"],
+)
+
 jsonnet_to_json_test(
     name = "strings_test",
     src = "strings.jsonnet",

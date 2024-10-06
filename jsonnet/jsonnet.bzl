@@ -289,8 +289,8 @@ def _jsonnet_to_json_impl(ctx):
         )]
 
     return [DefaultInfo(
-        files = depset([]),
-        runfiles = ctx.runfiles(files = []),
+        files = depset(outputs),
+        runfiles = ctx.runfiles(files = outputs),
     )]
 
 _EXIT_CODE_COMPARE_COMMAND = """
