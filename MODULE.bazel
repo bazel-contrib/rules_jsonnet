@@ -6,7 +6,7 @@ module(
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "jsonnet", version = "0.20.0")
 bazel_dep(name = "jsonnet_go", version = "0.20.0")
-bazel_dep(name = "rules_rust", version = "0.52.2")
+bazel_dep(name = "rules_rust", version = "0.53.0")
 
 jsonnet = use_extension("//jsonnet:extensions.bzl", "jsonnet")
 use_repo(jsonnet, "rules_jsonnet_toolchain")
