@@ -3,7 +3,7 @@ module(
     version = "0.0.0",
 )
 
-bazel_dep(name = "aspect_bazel_lib", version = "2.9.2")
+bazel_dep(name = "aspect_bazel_lib", version = "2.9.3")
 bazel_dep(name = "stardoc", version = "0.7.1")
 
 bazel_dep(name = "rules_jsonnet", version = "0.0.0")
