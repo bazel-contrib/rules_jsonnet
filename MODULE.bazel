@@ -15,6 +15,7 @@ register_toolchains("@rules_jsonnet_toolchain//:toolchain")
 
 rust_host = use_extension("@rules_rust//rust:extensions.bzl", "rust_host_tools")
 rust_host.host_tools(
+    name = "rust_host_tools_jsonnet",
     version = "nightly/2024-05-02",
 )
 
