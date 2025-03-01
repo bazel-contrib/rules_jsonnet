@@ -66,17 +66,17 @@ def _jsonnet_library_impl(ctx):
         _get_import_paths(ctx.label, ctx.files.srcs, ctx.attr.imports),
         transitive = [depinfo.imports],
     )
-    transitive_data = depset(
-        transitive = [dep.data_runfiles.files for dep in ctx.attr.deps],
-    )
 
     return [
         DefaultInfo(
             files = depset(),
             runfiles = ctx.runfiles(
-                transitive_files = transitive_data,
-                collect_data = True,
-            ),
+                files = ctx.files.data,
+            ).merge_all([
+                target[DefaultInfo].default_runfiles
+                for attr in (ctx.attr.data, ctx.attr.deps, ctx.attr.srcs)
+                for target in attr
+            ]),
         ),
         JsonnetLibraryInfo(
             imports = imports,
