@@ -3,11 +3,11 @@ module(
     version = "0.6.0",
 )
 
-bazel_dep(name = "bazel_skylib", version = "1.7.1")
-bazel_dep(name = "jsonnet", version = "0.20.0")
-bazel_dep(name = "jsonnet_go", version = "0.20.0")
-bazel_dep(name = "rules_python", version = "1.2.0")
-bazel_dep(name = "rules_rust", version = "0.54.1")
+bazel_dep(name = "bazel_skylib", version = "1.8.0")
+bazel_dep(name = "jsonnet", version = "0.21.0")
+bazel_dep(name = "jsonnet_go", version = "0.21.0")
+bazel_dep(name = "rules_python", version = "1.5.0")
+bazel_dep(name = "rules_rust", version = "0.62.0")
 
 jsonnet = use_extension("//jsonnet:extensions.bzl", "jsonnet")
 use_repo(jsonnet, "rules_jsonnet_toolchain")
@@ -16,23 +16,22 @@ register_toolchains("@rules_jsonnet_toolchain//:toolchain")
 
 rust_host = use_extension("@rules_rust//rust:extensions.bzl", "rust_host_tools")
 rust_host.host_tools(
-    version = "nightly/2024-05-02",
+    name = "rust_host_tools_jsonnet",
+    sha256s = {
+        "2025-07-01/rustc-nightly-aarch64-apple-darwin.tar.xz": "b5fb4b5272fea4d4ef6e3896e484e9748fda4f29be428ae3a55c22f70566b54c",
+        "2025-07-01/clippy-nightly-aarch64-apple-darwin.tar.xz": "a0715713220f6cb56031a86c91de7a26d1f89d149afc2e01af625a89ca63f673",
+        "2025-07-01/cargo-nightly-aarch64-apple-darwin.tar.xz": "4eb240f69df9f9159c6fef128c3b7c24e5e1ae8aaf1357de4924fd518bd54941",
+        "2025-07-01/llvm-tools-nightly-aarch64-apple-darwin.tar.xz": "ab8d9977ba3187819008b70dab317654bb290fc220cfea35b4f2ea165ce32e70",
+        "2025-07-01/rust-std-nightly-aarch64-apple-darwin.tar.xz": "da6c8e6f256bb6512485db068d35109a3c77ccac678bc28134665cd1b547863b",
+    },
+    version = "nightly/2025-07-01",
 )
+use_repo(rust_host, "rust_host_tools_jsonnet")
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
     edition = "2021",
-    sha256s = {
-        "2024-05-01/rustc-nightly-aarch64-apple-darwin.tar.xz": "3c3d4693b8e846c9c250bb14a97654657ca62a5eb20617a875c34462582daf83",
-        "2024-05-01/clippy-nightly-aarch64-apple-darwin.tar.xz": "379e22e343a7b1c2e39b030810ff633d800d0daae0f8fd6bf00181402c42be4e",
-        "2024-05-01/cargo-nightly-aarch64-apple-darwin.tar.xz": "899aec41e675146359d30a296db488f114cd280aef9dea566e178a8bb6f33774",
-        "2024-05-01/llvm-tools-nightly-aarch64-apple-darwin.tar.xz": "4b04ceaf724bea888fb1e5e6bd9a9a963196f585d4f73036e783a2c51d4e907e",
-        "2024-05-01/rust-std-nightly-aarch64-apple-darwin.tar.xz": "bf52ea3e1ac669455694079fb83b6bd0d446e759b9ab3502f75615d538e646a0",
-    },
-    # Nightly version is required to be able to depend on a binary dependency
-    # with Cargo.
-    # See https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#artifact-dependencies.
-    versions = ["nightly/2024-05-01"],
+    versions = ["1.88.0"],
 )
 use_repo(rust, "rust_toolchains")
 
@@ -52,5 +51,7 @@ crate.annotation(
     crate = "jrsonnet",
     gen_binaries = ["jrsonnet"],
 )
-crate.from_specs()
+crate.from_specs(
+    host_tools = "@rust_host_tools_jsonnet",
+)
 use_repo(crate, "crates")
