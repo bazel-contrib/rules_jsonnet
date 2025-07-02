@@ -20,14 +20,25 @@ _JSONNET_FILETYPE = [
     ".json",
 ]
 
-def _get_import_paths(label, files, imports):
+def _get_import_paths(label, files, imports, short_path):
+    # TODO: Is there a cleaner way to compute the short paths here?
     return [
         # Implicitly add the workspace root as an import path.
-        paths.join(".", file.root.path, label.workspace_root)
+        paths.join(
+            ".",
+            "" if short_path else file.root.path,
+            label.workspace_root.replace("external/", "../") if short_path else label.workspace_root,
+        )
         for file in files
     ] + [
         # Explicitly provided import paths.
-        paths.join(".", file.root.path, label.workspace_root, label.package, im)
+        paths.join(
+            ".",
+            "" if short_path else file.root.path,
+            label.workspace_root.replace("external/", "../") if short_path else label.workspace_root,
+            label.package,
+            im,
+        )
         for file in files
         for im in imports
     ]
@@ -44,15 +55,21 @@ def _setup_deps(deps):
             dependencies
         imports: List of Strings containing import flags set by transitive
             dependency targets.
+        short_imports: List of Strings containing import flags set by
+            transitive dependency targets, when invoking Jsonnet as part
+            of a test where dependencies are stored in runfiles.
     """
     transitive_sources = []
     imports = []
+    short_imports = []
     for dep in deps:
         transitive_sources.append(dep[JsonnetLibraryInfo].transitive_jsonnet_files)
         imports.append(dep[JsonnetLibraryInfo].imports)
+        short_imports.append(dep[JsonnetLibraryInfo].short_imports)
 
     return struct(
         imports = depset(transitive = imports),
+        short_imports = depset(transitive = short_imports),
         transitive_sources = depset(transitive = transitive_sources, order = "postorder"),
     )
 
@@ -63,8 +80,12 @@ def _jsonnet_library_impl(ctx):
     depinfo = _setup_deps(ctx.attr.deps)
     sources = depset(ctx.files.srcs, transitive = [depinfo.transitive_sources])
     imports = depset(
-        _get_import_paths(ctx.label, ctx.files.srcs, ctx.attr.imports),
+        _get_import_paths(ctx.label, ctx.files.srcs, ctx.attr.imports, False),
         transitive = [depinfo.imports],
+    )
+    short_imports = depset(
+        _get_import_paths(ctx.label, ctx.files.srcs, ctx.attr.imports, True),
+        transitive = [depinfo.short_imports],
     )
 
     return [
@@ -80,6 +101,7 @@ def _jsonnet_library_impl(ctx):
         ),
         JsonnetLibraryInfo(
             imports = imports,
+            short_imports = short_imports,
             transitive_jsonnet_files = sources,
         ),
     ]
@@ -173,7 +195,7 @@ def _jsonnet_to_json_impl(ctx):
             "set -e;",
             ctx.toolchains["//jsonnet:toolchain_type"].jsonnetinfo.compiler.path,
         ] +
-        ["-J " + shell.quote(im) for im in _get_import_paths(ctx.label, [ctx.file.src], ctx.attr.imports)] +
+        ["-J " + shell.quote(im) for im in _get_import_paths(ctx.label, [ctx.file.src], ctx.attr.imports, False)] +
         ["-J " + shell.quote(im) for im in depinfo.imports.to_list()] +
         other_args +
         ["--ext-str %s=%s" %
@@ -388,8 +410,8 @@ def _jsonnet_to_json_test_impl(ctx):
     other_args = ctx.attr.extra_args + (["-y"] if ctx.attr.yaml_stream else [])
     jsonnet_command = " ".join(
         ["OUTPUT=$(%s" % ctx.toolchains["//jsonnet:toolchain_type"].jsonnetinfo.compiler.short_path] +
-        ["-J " + shell.quote(im) for im in _get_import_paths(ctx.label, [ctx.file.src], ctx.attr.imports)] +
-        ["-J " + shell.quote(im) for im in depinfo.imports.to_list()] +
+        ["-J " + shell.quote(im) for im in _get_import_paths(ctx.label, [ctx.file.src], ctx.attr.imports, True)] +
+        ["-J " + shell.quote(im) for im in depinfo.short_imports.to_list()] +
         other_args +
         ["--ext-str %s=%s" %
          (_quote(key), _quote(val)) for key, val in jsonnet_ext_strs.items()] +
