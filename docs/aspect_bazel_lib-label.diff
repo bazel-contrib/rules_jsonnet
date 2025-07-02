@@ -1,0 +1,13 @@
+diff --git lib/private/docs.bzl lib/private/docs.bzl
+index feeb852..0395e3d 100644
+--- lib/private/docs.bzl
++++ lib/private/docs.bzl
+@@ -20,7 +20,7 @@ def stardoc_with_diff_test(
+     target_compatible_with = kwargs.pop("target_compatible_with", select({
+         # stardoc produces different line endings on Windows
+         # which makes the diff_test fail
+-        "@platforms//os:windows": ["@platforms//:incompatible"],
++        Label("@platforms//os:windows"): ["@platforms//:incompatible"],
+         "//conditions:default": [],
+     }))
+ 
