@@ -52,6 +52,7 @@ crate.annotation(
     gen_binaries = ["jrsonnet"],
 )
 crate.from_specs(
+    name = "crates_jsonnet",
     host_tools = "@rust_host_tools_jsonnet",
 )
-use_repo(crate, "crates")
+use_repo(crate, "crates_jsonnet")
