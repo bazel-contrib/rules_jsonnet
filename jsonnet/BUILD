@@ -35,7 +35,7 @@ toolchain_type(name = "toolchain_type")
 
 jsonnet_toolchain(
     name = "rust_jsonnet",
-    compiler = "@crates//:jrsonnet__jrsonnet",
+    compiler = "@crates_jsonnet//:jrsonnet__jrsonnet",
     create_directory_flags = ["-c"],
     manifest_file_support = False,
 )
