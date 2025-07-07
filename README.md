@@ -41,22 +41,6 @@ register a different compiler:
 | cpp              | `jsonnet.compiler(name = "cpp")`  |
 | Rust             | `jsonnet.compiler(name = "rust")` |
 
-### Rust Jsonnet Compiler
-
-To use the Rust Jsonnet compiler a `Nightly` Rust version for the host tools is
-required because `-Z bindeps` is needed to compile the Jrsonnet binary.
-
-Add the following snippet to the `MODULE.bazel` file:
-
-```Starlark
-bazel_dep(name = "rules_rust", version = "0.45.1")
-
-rust_host = use_extension("@rules_rust//rust:extensions.bzl", "rust_host_tools")
-rust_host.host_tools(
-    version = "nightly/2024-05-02",
-)
-```
-
 ### CLI
 
 Use the `--extra_toolchains` flag to pass the preferred toolchain to the bazel
