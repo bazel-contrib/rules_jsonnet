@@ -5,9 +5,9 @@
 <div class="toc">
   <h2>Rules</h2>
   <ul>
-    <li>[jsonnet_library](docs/jsonnet.md#jsonnet_library)</li>
-    <li>[jsonnet_to_json](docs/jsonnet.md#jsonnet_to_json)</li>
-    <li>[jsonnet_to_json_test](docs/jsonnet.md#jsonnet_to_json_test)</li>
+    <li><a href="docs/jsonnet.md#jsonnet_library">jsonnet_library</a></li>
+    <li><a href="docs/jsonnet.md#jsonnet_to_json">jsonnet_to_json</a></li>
+    <li><a href="docs/jsonnet.md#jsonnet_to_json_test">jsonnet_to_json_test</a></li>
   </ul>
 </div>
 
