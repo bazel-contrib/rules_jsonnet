@@ -3,7 +3,7 @@ module(
     version = "0.0.0",
 )
 
-bazel_dep(name = "aspect_bazel_lib", version = "2.20.0")
+bazel_dep(name = "aspect_bazel_lib", version = "2.21.0")
 bazel_dep(name = "stardoc", version = "0.8.0")
 bazel_dep(name = "rules_jsonnet", version = "0.0.0")
 local_path_override(
