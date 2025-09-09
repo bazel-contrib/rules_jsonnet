@@ -373,7 +373,7 @@ def _jsonnet_to_json_test_impl(ctx):
         # expected error output.
 
         # For legacy reasons, we also disable canonicalize_golden for yaml_streams.
-        canonicalize = not (ctx.attr.yaml_stream or not ctx.attr.canonicalize_golden)
+        canonicalize = ctx.attr.canonicalize_golden and not ctx.attr.yaml_stream
         dump_golden_cmd = (ctx.toolchains["//jsonnet:toolchain_type"].jsonnetinfo.compiler.short_path if ctx.attr.error == 0 and canonicalize else "/bin/cat")
         if ctx.attr.regex:
             diff_command = _REGEX_DIFF_COMMAND % (
