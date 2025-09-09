@@ -221,6 +221,7 @@ jsonnet_to_json_test(
     name = "yaml_stream_test",
     src = "yaml_stream.jsonnet",
     golden = "yaml_stream_golden.yaml",
+    regex = 1,
     yaml_stream = 1,
 )
 
