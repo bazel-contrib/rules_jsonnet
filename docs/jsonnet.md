@@ -72,9 +72,10 @@ Example:
 load("@rules_jsonnet//jsonnet:docs.bzl", "jsonnet_to_json")
 
 jsonnet_to_json(<a href="#jsonnet_to_json-name">name</a>, <a href="#jsonnet_to_json-deps">deps</a>, <a href="#jsonnet_to_json-src">src</a>, <a href="#jsonnet_to_json-data">data</a>, <a href="#jsonnet_to_json-outs">outs</a>, <a href="#jsonnet_to_json-code_vars">code_vars</a>, <a href="#jsonnet_to_json-ext_code">ext_code</a>, <a href="#jsonnet_to_json-ext_code_envs">ext_code_envs</a>, <a href="#jsonnet_to_json-ext_code_file_vars">ext_code_file_vars</a>,
-                <a href="#jsonnet_to_json-ext_code_files">ext_code_files</a>, <a href="#jsonnet_to_json-ext_str_envs">ext_str_envs</a>, <a href="#jsonnet_to_json-ext_str_file_vars">ext_str_file_vars</a>, <a href="#jsonnet_to_json-ext_str_files">ext_str_files</a>, <a href="#jsonnet_to_json-ext_strs">ext_strs</a>, <a href="#jsonnet_to_json-extra_args">extra_args</a>,
-                <a href="#jsonnet_to_json-imports">imports</a>, <a href="#jsonnet_to_json-multiple_outputs">multiple_outputs</a>, <a href="#jsonnet_to_json-out_dir">out_dir</a>, <a href="#jsonnet_to_json-stamp_keys">stamp_keys</a>, <a href="#jsonnet_to_json-tla_code">tla_code</a>, <a href="#jsonnet_to_json-tla_code_envs">tla_code_envs</a>,
-                <a href="#jsonnet_to_json-tla_code_files">tla_code_files</a>, <a href="#jsonnet_to_json-tla_str_envs">tla_str_envs</a>, <a href="#jsonnet_to_json-tla_str_files">tla_str_files</a>, <a href="#jsonnet_to_json-tla_strs">tla_strs</a>, <a href="#jsonnet_to_json-vars">vars</a>, <a href="#jsonnet_to_json-yaml_stream">yaml_stream</a>)
+                <a href="#jsonnet_to_json-ext_code_files">ext_code_files</a>, <a href="#jsonnet_to_json-ext_code_libraries">ext_code_libraries</a>, <a href="#jsonnet_to_json-ext_str_envs">ext_str_envs</a>, <a href="#jsonnet_to_json-ext_str_file_vars">ext_str_file_vars</a>, <a href="#jsonnet_to_json-ext_str_files">ext_str_files</a>,
+                <a href="#jsonnet_to_json-ext_strs">ext_strs</a>, <a href="#jsonnet_to_json-extra_args">extra_args</a>, <a href="#jsonnet_to_json-imports">imports</a>, <a href="#jsonnet_to_json-multiple_outputs">multiple_outputs</a>, <a href="#jsonnet_to_json-out_dir">out_dir</a>, <a href="#jsonnet_to_json-stamp_keys">stamp_keys</a>, <a href="#jsonnet_to_json-tla_code">tla_code</a>,
+                <a href="#jsonnet_to_json-tla_code_envs">tla_code_envs</a>, <a href="#jsonnet_to_json-tla_code_files">tla_code_files</a>, <a href="#jsonnet_to_json-tla_code_libraries">tla_code_libraries</a>, <a href="#jsonnet_to_json-tla_str_envs">tla_str_envs</a>, <a href="#jsonnet_to_json-tla_str_files">tla_str_files</a>,
+                <a href="#jsonnet_to_json-tla_strs">tla_strs</a>, <a href="#jsonnet_to_json-vars">vars</a>, <a href="#jsonnet_to_json-yaml_stream">yaml_stream</a>)
 </pre>
 
 Compiles Jsonnet code to JSON.
@@ -197,6 +198,7 @@ Example:
 | <a id="jsonnet_to_json-ext_code_envs"></a>ext_code_envs |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-ext_code_file_vars"></a>ext_code_file_vars |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-ext_code_files"></a>ext_code_files |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="jsonnet_to_json-ext_code_libraries"></a>ext_code_libraries |  Include jsonnet_library as an extvar with the key value   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_to_json-ext_str_envs"></a>ext_str_envs |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-ext_str_file_vars"></a>ext_str_file_vars |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-ext_str_files"></a>ext_str_files |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
@@ -209,6 +211,7 @@ Example:
 | <a id="jsonnet_to_json-tla_code"></a>tla_code |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_to_json-tla_code_envs"></a>tla_code_envs |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-tla_code_files"></a>tla_code_files |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
+| <a id="jsonnet_to_json-tla_code_libraries"></a>tla_code_libraries |  Include jsonnet_library as a top-level argument as the given value   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_to_json-tla_str_envs"></a>tla_str_envs |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-tla_str_files"></a>tla_str_files |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_to_json-tla_strs"></a>tla_strs |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
@@ -224,10 +227,11 @@ Example:
 load("@rules_jsonnet//jsonnet:docs.bzl", "jsonnet_to_json_test")
 
 jsonnet_to_json_test(<a href="#jsonnet_to_json_test-name">name</a>, <a href="#jsonnet_to_json_test-deps">deps</a>, <a href="#jsonnet_to_json_test-src">src</a>, <a href="#jsonnet_to_json_test-data">data</a>, <a href="#jsonnet_to_json_test-canonicalize_golden">canonicalize_golden</a>, <a href="#jsonnet_to_json_test-code_vars">code_vars</a>, <a href="#jsonnet_to_json_test-error">error</a>, <a href="#jsonnet_to_json_test-ext_code">ext_code</a>,
-                     <a href="#jsonnet_to_json_test-ext_code_envs">ext_code_envs</a>, <a href="#jsonnet_to_json_test-ext_code_file_vars">ext_code_file_vars</a>, <a href="#jsonnet_to_json_test-ext_code_files">ext_code_files</a>, <a href="#jsonnet_to_json_test-ext_str_envs">ext_str_envs</a>,
-                     <a href="#jsonnet_to_json_test-ext_str_file_vars">ext_str_file_vars</a>, <a href="#jsonnet_to_json_test-ext_str_files">ext_str_files</a>, <a href="#jsonnet_to_json_test-ext_strs">ext_strs</a>, <a href="#jsonnet_to_json_test-extra_args">extra_args</a>, <a href="#jsonnet_to_json_test-golden">golden</a>, <a href="#jsonnet_to_json_test-imports">imports</a>,
-                     <a href="#jsonnet_to_json_test-output_file_contents">output_file_contents</a>, <a href="#jsonnet_to_json_test-regex">regex</a>, <a href="#jsonnet_to_json_test-stamp_keys">stamp_keys</a>, <a href="#jsonnet_to_json_test-tla_code">tla_code</a>, <a href="#jsonnet_to_json_test-tla_code_envs">tla_code_envs</a>, <a href="#jsonnet_to_json_test-tla_code_files">tla_code_files</a>,
-                     <a href="#jsonnet_to_json_test-tla_str_envs">tla_str_envs</a>, <a href="#jsonnet_to_json_test-tla_str_files">tla_str_files</a>, <a href="#jsonnet_to_json_test-tla_strs">tla_strs</a>, <a href="#jsonnet_to_json_test-vars">vars</a>, <a href="#jsonnet_to_json_test-yaml_stream">yaml_stream</a>)
+                     <a href="#jsonnet_to_json_test-ext_code_envs">ext_code_envs</a>, <a href="#jsonnet_to_json_test-ext_code_file_vars">ext_code_file_vars</a>, <a href="#jsonnet_to_json_test-ext_code_files">ext_code_files</a>, <a href="#jsonnet_to_json_test-ext_code_libraries">ext_code_libraries</a>,
+                     <a href="#jsonnet_to_json_test-ext_str_envs">ext_str_envs</a>, <a href="#jsonnet_to_json_test-ext_str_file_vars">ext_str_file_vars</a>, <a href="#jsonnet_to_json_test-ext_str_files">ext_str_files</a>, <a href="#jsonnet_to_json_test-ext_strs">ext_strs</a>, <a href="#jsonnet_to_json_test-extra_args">extra_args</a>, <a href="#jsonnet_to_json_test-golden">golden</a>,
+                     <a href="#jsonnet_to_json_test-imports">imports</a>, <a href="#jsonnet_to_json_test-output_file_contents">output_file_contents</a>, <a href="#jsonnet_to_json_test-regex">regex</a>, <a href="#jsonnet_to_json_test-stamp_keys">stamp_keys</a>, <a href="#jsonnet_to_json_test-tla_code">tla_code</a>, <a href="#jsonnet_to_json_test-tla_code_envs">tla_code_envs</a>,
+                     <a href="#jsonnet_to_json_test-tla_code_files">tla_code_files</a>, <a href="#jsonnet_to_json_test-tla_code_libraries">tla_code_libraries</a>, <a href="#jsonnet_to_json_test-tla_str_envs">tla_str_envs</a>, <a href="#jsonnet_to_json_test-tla_str_files">tla_str_files</a>, <a href="#jsonnet_to_json_test-tla_strs">tla_strs</a>, <a href="#jsonnet_to_json_test-vars">vars</a>,
+                     <a href="#jsonnet_to_json_test-yaml_stream">yaml_stream</a>)
 </pre>
 
 Compiles Jsonnet code to JSON and checks the output.
@@ -345,6 +349,7 @@ Example:
 | <a id="jsonnet_to_json_test-ext_code_envs"></a>ext_code_envs |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-ext_code_file_vars"></a>ext_code_file_vars |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-ext_code_files"></a>ext_code_files |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
+| <a id="jsonnet_to_json_test-ext_code_libraries"></a>ext_code_libraries |  Include jsonnet_library as an extvar with the key value   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_to_json_test-ext_str_envs"></a>ext_str_envs |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-ext_str_file_vars"></a>ext_str_file_vars |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-ext_str_files"></a>ext_str_files |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
@@ -358,6 +363,7 @@ Example:
 | <a id="jsonnet_to_json_test-tla_code"></a>tla_code |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_to_json_test-tla_code_envs"></a>tla_code_envs |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-tla_code_files"></a>tla_code_files |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
+| <a id="jsonnet_to_json_test-tla_code_libraries"></a>tla_code_libraries |  Include jsonnet_library as a top-level argument as the given value   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_to_json_test-tla_str_envs"></a>tla_str_envs |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-tla_str_files"></a>tla_str_files |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_to_json_test-tla_strs"></a>tla_strs |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
