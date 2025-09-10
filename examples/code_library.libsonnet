@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Re-export depdencies for depedency injection
+// Re-export dependencies for dependency inversion
 {
   workflow: import 'workflow.libsonnet',
 }

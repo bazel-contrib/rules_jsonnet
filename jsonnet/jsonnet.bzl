@@ -203,10 +203,10 @@ def _jsonnet_to_json_impl(ctx):
     stamp_inputs = strs_stamp_inputs + code_stamp_inputs + tla_strs_stamp_inputs + tla_code_stamp_inputs
 
     if len(jsonnet_ext_str_file_vars) != len(jsonnet_ext_str_files):
-        fail("Mistach of ext_str_file_vars ({}) to ext_str_files ({})".format(jsonnet_ext_str_file_vars, jsonnet_ext_str_files))
+        fail("Mismatch of ext_str_file_vars ({}) to ext_str_files ({})".format(jsonnet_ext_str_file_vars, jsonnet_ext_str_files))
 
     if len(jsonnet_ext_code_file_vars) != len(jsonnet_ext_code_files):
-        fail("Mistach of ext_code_file_vars ({}) to ext_code_files ({})".format(jsonnet_ext_code_file_vars, jsonnet_ext_code_files))
+        fail("Mismatch of ext_code_file_vars ({}) to ext_code_files ({})".format(jsonnet_ext_code_file_vars, jsonnet_ext_code_files))
 
     if ctx.attr.stamp_keys and not stamp_inputs:
         fail("Stamping requested but found no stamp variable to resolve for.")
@@ -248,7 +248,7 @@ def _jsonnet_to_json_impl(ctx):
         ["--tla-code-file %s=%s" %
          (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_code_files.items()] +
         ["--tla-code-file %s=%s" %
-         (_quote(val),_quote(key[DefaultInfo].files.to_list()[0].path)) for key, val in jsonnet_tla_code_libraries.items()]
+         (_quote(val), _quote(key[DefaultInfo].files.to_list()[0].path)) for key, val in jsonnet_tla_code_libraries.items()]
     )
 
     outputs = []
@@ -437,10 +437,10 @@ def _jsonnet_to_json_test_impl(ctx):
     stamp_inputs = strs_stamp_inputs + code_stamp_inputs + tla_strs_stamp_inputs + tla_code_stamp_inputs
 
     if len(jsonnet_ext_str_file_vars) != len(jsonnet_ext_str_files):
-        fail("Mistach of ext_str_file_vars ({}) to ext_str_files ({})".format(jsonnet_ext_str_file_vars, jsonnet_ext_str_files))
+        fail("Mismatch of ext_str_file_vars ({}) to ext_str_files ({})".format(jsonnet_ext_str_file_vars, jsonnet_ext_str_files))
 
     if len(jsonnet_ext_code_file_vars) != len(jsonnet_ext_code_files):
-        fail("Mistach of ext_code_file_vars ({}) to ext_code_files ({})".format(jsonnet_ext_code_file_vars, jsonnet_ext_code_files))
+        fail("Mismatch of ext_code_file_vars ({}) to ext_code_files ({})".format(jsonnet_ext_code_file_vars, jsonnet_ext_code_files))
 
     other_args = ctx.attr.extra_args + (["-y"] if ctx.attr.yaml_stream else [])
     jsonnet_command = " ".join(
@@ -461,7 +461,7 @@ def _jsonnet_to_json_test_impl(ctx):
         ["--ext-code-file %s=%s" %
          (var, jfile.short_path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] +
         ["--ext-code-file %s=%s" %
-         (_quote(val), _quote(key[DefaultInfo].files.to_list()[0].path)) for key, val in jsonnet_ext_code_libraries.items()] +
+         (_quote(val), _quote(key[DefaultInfo].files.to_list()[0].short_path)) for key, val in jsonnet_ext_code_libraries.items()] +
         ["--tla-str %s=%s" %
          (_quote(key), _quote(val)) for key, val in jsonnet_tla_strs.items()] +
         ["--tla-str '%s'" %
@@ -471,11 +471,11 @@ def _jsonnet_to_json_test_impl(ctx):
         ["--tla-code %s" %
          tla_code_env for tla_code_env in jsonnet_tla_code_envs] +
         ["--tla-str-file %s=%s" %
-         (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_str_files.items()] +
+         (var, jfile.files.to_list()[0].short_path) for jfile, var in jsonnet_tla_str_files.items()] +
         ["--tla-code-file %s=%s" %
-         (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_code_files.items()] +
+         (var, jfile.files.to_list()[0].short_path) for jfile, var in jsonnet_tla_code_files.items()] +
         ["--tla-code-file %s=%s" %
-         (_quote(val), _quote(key[DefaultInfo].files.to_list()[0].path)) for key, val in jsonnet_tla_code_libraries.items()] +
+         (_quote(val), _quote(key[DefaultInfo].files.to_list()[0].short_path)) for key, val in jsonnet_tla_code_libraries.items()] +
         [
             ctx.file.src.short_path,
             "2>&1)",
