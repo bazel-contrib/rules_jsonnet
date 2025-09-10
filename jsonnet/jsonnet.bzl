@@ -20,6 +20,15 @@ _JSONNET_FILETYPE = [
     ".json",
 ]
 
+JsonnetLibraryInfo = provider(
+    fields = {
+        'imports': 'Depset of Strings containing import flags set by transitive dependency targets.',
+        'short_imports': 'Depset of Strings containing import flags set by transitive dependency targets, when invoking Jsonnet as part of a test where dependencies are stored in runfiles.',
+        'transitive_jsonnet_files': 'Depset of Files containing sources of transitive dependencies',
+    }
+)
+
+
 def _get_import_paths(label, files, imports, short_path):
     # TODO: Is there a cleaner way to compute the short paths here?
     return [
@@ -43,19 +52,21 @@ def _get_import_paths(label, files, imports, short_path):
         for im in imports
     ]
 
-def _setup_deps(deps):
+def _setup_deps(deps, tla_code_libraries={}, ext_code_libraries={}):
     """Collects source files and import flags of transitive dependencies.
 
     Args:
       deps: List of deps labels from ctx.attr.deps.
+      tla_code_libraries: Dict of labels to names from ctx.attr.tla_code_files.
+      ext_code_libraries: List of deps labels from ctx.attr.ext_code_files.
 
     Returns:
-      Returns a struct containing the following fields:
-        transitive_sources: List of Files containing sources of transitive
+      Returns a JsonnetLibraryInfo struct containing the following fields:
+        transitive_jsonnet_files: Depset of Files containing sources of transitive
             dependencies
-        imports: List of Strings containing import flags set by transitive
+        imports: Depset of Strings containing import flags set by transitive
             dependency targets.
-        short_imports: List of Strings containing import flags set by
+        short_imports: Depset of Strings containing import flags set by
             transitive dependency targets, when invoking Jsonnet as part
             of a test where dependencies are stored in runfiles.
     """
@@ -67,18 +78,21 @@ def _setup_deps(deps):
         imports.append(dep[JsonnetLibraryInfo].imports)
         short_imports.append(dep[JsonnetLibraryInfo].short_imports)
 
-    return struct(
+    for code_file in tla_code_libraries.keys() + ext_code_libraries.keys():
+        transitive_sources.append(code_file[JsonnetLibraryInfo].transitive_jsonnet_files)
+        imports.append(code_file[JsonnetLibraryInfo].imports)
+        short_imports.append(code_file[JsonnetLibraryInfo].short_imports)
+
+    return JsonnetLibraryInfo(
         imports = depset(transitive = imports),
         short_imports = depset(transitive = short_imports),
-        transitive_sources = depset(transitive = transitive_sources, order = "postorder"),
+        transitive_jsonnet_files = depset(transitive = transitive_sources, order = "postorder"),
     )
-
-JsonnetLibraryInfo = provider()
 
 def _jsonnet_library_impl(ctx):
     """Implementation of the jsonnet_library rule."""
     depinfo = _setup_deps(ctx.attr.deps)
-    sources = depset(ctx.files.srcs, transitive = [depinfo.transitive_sources])
+    sources = depset(ctx.files.srcs, transitive = [depinfo.transitive_jsonnet_files])
     imports = depset(
         _get_import_paths(ctx.label, ctx.files.srcs, ctx.attr.imports, False),
         transitive = [depinfo.imports],
@@ -90,7 +104,7 @@ def _jsonnet_library_impl(ctx):
 
     return [
         DefaultInfo(
-            files = depset(),
+            files = depset(ctx.files.srcs),
             runfiles = ctx.runfiles(
                 files = ctx.files.data,
             ).merge_all([
@@ -163,7 +177,6 @@ def _jsonnet_to_json_impl(ctx):
     if ctx.attr.code_vars:
         print("'code_vars' attribute is deprecated, please use 'ext_code'.")
 
-    depinfo = _setup_deps(ctx.attr.deps)
     jsonnet_ext_strs = ctx.attr.ext_strs or ctx.attr.vars
     jsonnet_ext_str_envs = ctx.attr.ext_str_envs
     jsonnet_ext_code = ctx.attr.ext_code or ctx.attr.code_vars
@@ -172,12 +185,16 @@ def _jsonnet_to_json_impl(ctx):
     jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
     jsonnet_ext_code_files = ctx.files.ext_code_files
     jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
+    jsonnet_ext_code_libraries = ctx.attr.ext_code_libraries
     jsonnet_tla_strs = ctx.attr.tla_strs
     jsonnet_tla_str_envs = ctx.attr.tla_str_envs
     jsonnet_tla_code = ctx.attr.tla_code
     jsonnet_tla_code_envs = ctx.attr.tla_code_envs
     jsonnet_tla_str_files = ctx.attr.tla_str_files
     jsonnet_tla_code_files = ctx.attr.tla_code_files
+    jsonnet_tla_code_libraries = ctx.attr.tla_code_libraries
+
+    depinfo = _setup_deps(ctx.attr.deps, jsonnet_tla_code_libraries, jsonnet_ext_code_libraries)
 
     jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, False)
     jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, False)
@@ -210,6 +227,8 @@ def _jsonnet_to_json_impl(ctx):
          (var, jfile.path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
         ["--ext-code-file %s=%s" %
          (var, jfile.path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] +
+        ["--ext-code-file %s=%s" %
+         (_quote(val), _quote(key[DefaultInfo].files.to_list()[0].path)) for key, val in jsonnet_ext_code_libraries.items()] +
         ["--tla-str %s=%s" %
          (_quote(key), _quote(val)) for key, val in jsonnet_tla_strs.items()] +
         ["--tla-str '%s'" %
@@ -221,7 +240,9 @@ def _jsonnet_to_json_impl(ctx):
         ["--tla-str-file %s=%s" %
          (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_str_files.items()] +
         ["--tla-code-file %s=%s" %
-         (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_code_files.items()]
+         (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_code_files.items()] +
+        ["--tla-code-file %s=%s" %
+         (_quote(val),_quote(key[DefaultInfo].files.to_list()[0].path)) for key, val in jsonnet_tla_code_libraries.items()]
     )
 
     outputs = []
@@ -290,7 +311,7 @@ def _jsonnet_to_json_impl(ctx):
     compile_inputs = (
         [ctx.file.src] +
         runfiles.files.to_list() +
-        depinfo.transitive_sources.to_list()
+        depinfo.transitive_jsonnet_files.to_list()
     )
 
     ctx.actions.run_shell(
@@ -360,7 +381,7 @@ fi
 
 def _jsonnet_to_json_test_impl(ctx):
     """Implementation of the jsonnet_to_json_test rule."""
-    depinfo = _setup_deps(ctx.attr.deps)
+    depinfo = _setup_deps(ctx.attr.deps, ctx.attr.tla_code_libraries, ctx.attr.ext_code_libraries)
 
     golden_files = []
     diff_command = ""
@@ -396,16 +417,24 @@ def _jsonnet_to_json_test_impl(ctx):
     jsonnet_ext_str_file_vars = ctx.attr.ext_str_file_vars
     jsonnet_ext_code_files = ctx.files.ext_code_files
     jsonnet_ext_code_file_vars = ctx.attr.ext_code_file_vars
+    jsonnet_ext_code_libraries = ctx.attr.ext_code_libraries
     jsonnet_tla_str_envs = ctx.attr.tla_str_envs
     jsonnet_tla_code_envs = ctx.attr.tla_code_envs
     jsonnet_tla_str_files = ctx.attr.tla_str_files
     jsonnet_tla_code_files = ctx.attr.tla_code_files
+    jsonnet_tla_code_libraries = ctx.attr.tla_code_libraries
 
     jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, True)
     jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, True)
     jsonnet_tla_strs, tla_strs_stamp_inputs = _make_stamp_resolve(ctx.attr.tla_strs, ctx, True)
     jsonnet_tla_code, tla_code_stamp_inputs = _make_stamp_resolve(ctx.attr.tla_code, ctx, True)
     stamp_inputs = strs_stamp_inputs + code_stamp_inputs + tla_strs_stamp_inputs + tla_code_stamp_inputs
+
+    if len(jsonnet_ext_str_file_vars) != len(jsonnet_ext_str_files):
+        fail("Mistach of ext_code_file_vars ({}) to ext_code_files ({})".format(jsonnet_ext_code_file_vars, jsonnet_ext_code_files))
+
+    if len(jsonnet_ext_code_file_vars) != len(jsonnet_ext_code_files):
+        fail("Mistach of ext_code_file_vars ({}) to ext_code_files ({})".format(jsonnet_ext_code_file_vars, jsonnet_ext_code_files))
 
     other_args = ctx.attr.extra_args + (["-y"] if ctx.attr.yaml_stream else [])
     jsonnet_command = " ".join(
@@ -425,6 +454,8 @@ def _jsonnet_to_json_test_impl(ctx):
          (var, jfile.short_path) for var, jfile in zip(jsonnet_ext_str_file_vars, jsonnet_ext_str_files)] +
         ["--ext-code-file %s=%s" %
          (var, jfile.short_path) for var, jfile in zip(jsonnet_ext_code_file_vars, jsonnet_ext_code_files)] +
+        ["--ext-code-file %s=%s" %
+         (_quote(val), _quote(key[DefaultInfo].files.to_list()[0].path)) for key, val in jsonnet_ext_code_libraries.items()] +
         ["--tla-str %s=%s" %
          (_quote(key), _quote(val)) for key, val in jsonnet_tla_strs.items()] +
         ["--tla-str '%s'" %
@@ -437,6 +468,8 @@ def _jsonnet_to_json_test_impl(ctx):
          (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_str_files.items()] +
         ["--tla-code-file %s=%s" %
          (var, jfile.files.to_list()[0].path) for jfile, var in jsonnet_tla_code_files.items()] +
+        ["--tla-code-file %s=%s" %
+         (_quote(val), _quote(key[DefaultInfo].files.to_list()[0].path)) for key, val in jsonnet_tla_code_libraries.items()] +
         [
             ctx.file.src.short_path,
             "2>&1)",
@@ -474,7 +507,7 @@ def _jsonnet_to_json_test_impl(ctx):
         ] +
         golden_files +
         transitive_data.to_list() +
-        depinfo.transitive_sources.to_list() +
+        depinfo.transitive_jsonnet_files.to_list() +
         jsonnet_ext_str_files +
         jsonnet_ext_code_files +
         stamp_inputs
@@ -560,6 +593,10 @@ _jsonnet_compile_attrs = {
     "ext_code_files": attr.label_list(
         allow_files = True,
     ),
+    "ext_code_libraries": attr.label_keyed_string_dict(
+        doc = "Include jsonnet_library as a extvar with the key value",
+        providers = [JsonnetLibraryInfo],
+    ),
     "ext_str_envs": attr.string_list(),
     "ext_str_file_vars": attr.string_list(),
     "ext_str_files": attr.label_list(
@@ -572,6 +609,10 @@ _jsonnet_compile_attrs = {
     "tla_str_envs": attr.string_list(),
     "tla_str_files": attr.label_keyed_string_dict(allow_files = True),
     "tla_code_files": attr.label_keyed_string_dict(allow_files = True),
+    "tla_code_libraries": attr.label_keyed_string_dict(
+        doc = "Include jsonnet_library as a top-level argument as the given value",
+        providers = [JsonnetLibraryInfo],
+    ),
     "stamp_keys": attr.string_list(
         default = [],
         mandatory = False,

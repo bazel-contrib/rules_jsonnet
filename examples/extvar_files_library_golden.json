@@ -1,0 +1,16 @@
+{
+   "job": {
+      "deps": [ ],
+      "inputs": [ ],
+      "outputs": [ ],
+      "type": "base"
+   },
+   "shJob": {
+      "command": "",
+      "deps": [ ],
+      "inputs": [ ],
+      "outputs": [ ],
+      "type": "sh",
+      "vars": { }
+   }
+}
