@@ -202,6 +202,12 @@ def _jsonnet_to_json_impl(ctx):
     jsonnet_tla_code, tla_code_stamp_inputs = _make_stamp_resolve(ctx.attr.tla_code, ctx, False)
     stamp_inputs = strs_stamp_inputs + code_stamp_inputs + tla_strs_stamp_inputs + tla_code_stamp_inputs
 
+    if len(jsonnet_ext_str_file_vars) != len(jsonnet_ext_str_files):
+        fail("Mistach of ext_str_file_vars ({}) to ext_str_files ({})".format(jsonnet_ext_str_file_vars, jsonnet_ext_str_files))
+
+    if len(jsonnet_ext_code_file_vars) != len(jsonnet_ext_code_files):
+        fail("Mistach of ext_code_file_vars ({}) to ext_code_files ({})".format(jsonnet_ext_code_file_vars, jsonnet_ext_code_files))
+
     if ctx.attr.stamp_keys and not stamp_inputs:
         fail("Stamping requested but found no stamp variable to resolve for.")
 
@@ -431,7 +437,7 @@ def _jsonnet_to_json_test_impl(ctx):
     stamp_inputs = strs_stamp_inputs + code_stamp_inputs + tla_strs_stamp_inputs + tla_code_stamp_inputs
 
     if len(jsonnet_ext_str_file_vars) != len(jsonnet_ext_str_files):
-        fail("Mistach of ext_code_file_vars ({}) to ext_code_files ({})".format(jsonnet_ext_code_file_vars, jsonnet_ext_code_files))
+        fail("Mistach of ext_str_file_vars ({}) to ext_str_files ({})".format(jsonnet_ext_str_file_vars, jsonnet_ext_str_files))
 
     if len(jsonnet_ext_code_file_vars) != len(jsonnet_ext_code_files):
         fail("Mistach of ext_code_file_vars ({}) to ext_code_files ({})".format(jsonnet_ext_code_file_vars, jsonnet_ext_code_files))
