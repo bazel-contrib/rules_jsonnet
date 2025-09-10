@@ -198,7 +198,7 @@ Example:
 | <a id="jsonnet_to_json-ext_code_envs"></a>ext_code_envs |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-ext_code_file_vars"></a>ext_code_file_vars |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-ext_code_files"></a>ext_code_files |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="jsonnet_to_json-ext_code_libraries"></a>ext_code_libraries |  Include jsonnet_library as a extvar with the key value   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
+| <a id="jsonnet_to_json-ext_code_libraries"></a>ext_code_libraries |  Include jsonnet_library as an extvar with the key value   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_to_json-ext_str_envs"></a>ext_str_envs |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-ext_str_file_vars"></a>ext_str_file_vars |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json-ext_str_files"></a>ext_str_files |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
@@ -349,7 +349,7 @@ Example:
 | <a id="jsonnet_to_json_test-ext_code_envs"></a>ext_code_envs |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-ext_code_file_vars"></a>ext_code_file_vars |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-ext_code_files"></a>ext_code_files |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="jsonnet_to_json_test-ext_code_libraries"></a>ext_code_libraries |  Include jsonnet_library as a extvar with the key value   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
+| <a id="jsonnet_to_json_test-ext_code_libraries"></a>ext_code_libraries |  Include jsonnet_library as an extvar with the key value   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_to_json_test-ext_str_envs"></a>ext_str_envs |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-ext_str_file_vars"></a>ext_str_file_vars |  -   | List of strings | optional |  `[]`  |
 | <a id="jsonnet_to_json_test-ext_str_files"></a>ext_str_files |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |

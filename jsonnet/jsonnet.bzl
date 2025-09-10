@@ -22,12 +22,11 @@ _JSONNET_FILETYPE = [
 
 JsonnetLibraryInfo = provider(
     fields = {
-        'imports': 'Depset of Strings containing import flags set by transitive dependency targets.',
-        'short_imports': 'Depset of Strings containing import flags set by transitive dependency targets, when invoking Jsonnet as part of a test where dependencies are stored in runfiles.',
-        'transitive_jsonnet_files': 'Depset of Files containing sources of transitive dependencies',
-    }
+        "imports": "Depset of Strings containing import flags set by transitive dependency targets.",
+        "short_imports": "Depset of Strings containing import flags set by transitive dependency targets, when invoking Jsonnet as part of a test where dependencies are stored in runfiles.",
+        "transitive_jsonnet_files": "Depset of Files containing sources of transitive dependencies",
+    },
 )
-
 
 def _get_import_paths(label, files, imports, short_path):
     # TODO: Is there a cleaner way to compute the short paths here?
@@ -52,7 +51,7 @@ def _get_import_paths(label, files, imports, short_path):
         for im in imports
     ]
 
-def _setup_deps(deps, tla_code_libraries={}, ext_code_libraries={}):
+def _setup_deps(deps, tla_code_libraries = {}, ext_code_libraries = {}):
     """Collects source files and import flags of transitive dependencies.
 
     Args:
@@ -600,7 +599,7 @@ _jsonnet_compile_attrs = {
         allow_files = True,
     ),
     "ext_code_libraries": attr.label_keyed_string_dict(
-        doc = "Include jsonnet_library as a extvar with the key value",
+        doc = "Include jsonnet_library as an extvar with the key value",
         providers = [JsonnetLibraryInfo],
     ),
     "ext_str_envs": attr.string_list(),
