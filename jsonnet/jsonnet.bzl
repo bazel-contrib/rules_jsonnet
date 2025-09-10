@@ -60,8 +60,8 @@ def _setup_deps(deps, tla_code_libraries = {}, ext_code_libraries = {}):
       ext_code_libraries: List of deps labels from ctx.attr.ext_code_files.
 
     Returns:
-      Returns a JsonnetLibraryInfo struct containing the following fields:
-        transitive_jsonnet_files: Depset of Files containing sources of transitive
+      Returns a struct containing the following fields:
+        transitive_sources: Depset of Files containing sources of transitive
             dependencies
         imports: Depset of Strings containing import flags set by transitive
             dependency targets.
@@ -82,16 +82,16 @@ def _setup_deps(deps, tla_code_libraries = {}, ext_code_libraries = {}):
         imports.append(code_file[JsonnetLibraryInfo].imports)
         short_imports.append(code_file[JsonnetLibraryInfo].short_imports)
 
-    return JsonnetLibraryInfo(
+    return struct(
         imports = depset(transitive = imports),
         short_imports = depset(transitive = short_imports),
-        transitive_jsonnet_files = depset(transitive = transitive_sources, order = "postorder"),
+        transitive_sources = depset(transitive = transitive_sources, order = "postorder"),
     )
 
 def _jsonnet_library_impl(ctx):
     """Implementation of the jsonnet_library rule."""
     depinfo = _setup_deps(ctx.attr.deps)
-    sources = depset(ctx.files.srcs, transitive = [depinfo.transitive_jsonnet_files])
+    sources = depset(ctx.files.srcs, transitive = [depinfo.transitive_sources])
     imports = depset(
         _get_import_paths(ctx.label, ctx.files.srcs, ctx.attr.imports, False),
         transitive = [depinfo.imports],
@@ -316,7 +316,7 @@ def _jsonnet_to_json_impl(ctx):
     compile_inputs = (
         [ctx.file.src] +
         runfiles.files.to_list() +
-        depinfo.transitive_jsonnet_files.to_list()
+        depinfo.transitive_sources.to_list()
     )
 
     ctx.actions.run_shell(
@@ -512,7 +512,7 @@ def _jsonnet_to_json_test_impl(ctx):
         ] +
         golden_files +
         transitive_data.to_list() +
-        depinfo.transitive_jsonnet_files.to_list() +
+        depinfo.transitive_sources.to_list() +
         jsonnet_ext_str_files +
         jsonnet_ext_code_files +
         stamp_inputs
