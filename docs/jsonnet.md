@@ -62,13 +62,13 @@ Example:
 | <a id="jsonnet_library-deps"></a>deps |  List of targets that are required by the `srcs` Jsonnet files.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="jsonnet_library-srcs"></a>srcs |  List of `.jsonnet` files that comprises this Jsonnet library   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="jsonnet_library-data"></a>data |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="jsonnet_library-ext_code"></a>ext_code |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
-| <a id="jsonnet_library-ext_code_envs"></a>ext_code_envs |  -   | List of strings | optional |  `[]`  |
-| <a id="jsonnet_library-ext_code_files"></a>ext_code_files |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
+| <a id="jsonnet_library-ext_code"></a>ext_code |  Include code from the dict value via extvar. Variable name matches the key   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
+| <a id="jsonnet_library-ext_code_envs"></a>ext_code_envs |  Include code from an environment variable via extvar. Variable name matches the environment variable name   | List of strings | optional |  `[]`  |
+| <a id="jsonnet_library-ext_code_files"></a>ext_code_files |  Include code from a file from dict key via extvar. Variable name matches the value   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_library-ext_code_libraries"></a>ext_code_libraries |  Include jsonnet_library as an extvar with the key value   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
-| <a id="jsonnet_library-ext_str_envs"></a>ext_str_envs |  -   | List of strings | optional |  `[]`  |
-| <a id="jsonnet_library-ext_str_files"></a>ext_str_files |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
-| <a id="jsonnet_library-ext_strs"></a>ext_strs |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
+| <a id="jsonnet_library-ext_str_envs"></a>ext_str_envs |  Include string from an environment variable via extvar. Variable name matches the environment variable name   | List of strings | optional |  `[]`  |
+| <a id="jsonnet_library-ext_str_files"></a>ext_str_files |  Include string from a file from dict key via extvar. Variable name matches the value   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
+| <a id="jsonnet_library-ext_strs"></a>ext_strs |  Include string from the dict value via extvar. Variable name matches the key   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="jsonnet_library-imports"></a>imports |  List of import `-J` flags to be passed to the `jsonnet` compiler.   | List of strings | optional |  `[]`  |
 
 
