@@ -120,14 +120,14 @@ jsonnet_to_json_test(
 jsonnet_library(
     name = "code_library_lib",
     srcs = ["code_library.libsonnet"],
-    deps = [":workflow"]
+    deps = [":workflow"],
 )
 
 jsonnet_to_json_test(
     name = "extvar_code_library_test",
     size = "small",
     src = "extvar_code_library.jsonnet",
-    ext_code_libraries = { ":code_library_lib": "codefile" },
+    ext_code_libraries = {":code_library_lib": "codefile"},
     golden = "extvar_files_library_golden.json",
 )
 
@@ -135,8 +135,8 @@ jsonnet_to_json_test(
     name = "tla_code_library_test",
     size = "small",
     src = "tla_code_library.jsonnet",
-    tla_code_libraries = { ":code_library_lib": "tla_code" },
     golden = "tla_code_library_golden.json",
+    tla_code_libraries = {":code_library_lib": "tla_code"},
 )
 
 jsonnet_to_json_test(
@@ -342,18 +342,18 @@ jsonnet_library(
     srcs = [
         "extvar.libsonnet",
     ],
+    ext_code_envs = ["MYJSONNET"],
+    ext_code_libraries = {
+        ":code_library_lib": "ext_lib",
+    },
+    ext_str_envs = ["MYTEST"],
+    ext_str_files = {
+        ":test_str_files": "str_files",
+    },
     ext_strs = {
         "non_stamp": "non_stamp",
         "mydefine": "$(mydefine)",
         "k8s": "{STABLE_K8S_CLUSTER}",
-    },
-    ext_str_files = {
-        ":test_str_files": "str_files"
-    },
-    ext_code_envs = ["MYJSONNET"],
-    ext_str_envs = ["MYTEST"],
-    ext_code_libraries = {
-        ":code_library_lib": "ext_lib"
     },
 )
 
@@ -368,14 +368,14 @@ jsonnet_to_json_test(
 
 jsonnet_to_json(
     name = "extvar-lib-json",
-    outs = ["ext-lib.json"],
     src = "extvar-library.jsonnet",
-    deps = [
-        ":extvar-lib",
-    ],
+    outs = ["ext-lib.json"],
+    ext_code_envs = ["MYJSONNET"],
+    ext_str_envs = ["MYTEST"],
     ext_strs = {
         "non_stamp": "non_stamp",
     },
-    ext_code_envs = ["MYJSONNET"],
-    ext_str_envs = ["MYTEST"],
+    deps = [
+        ":extvar-lib",
+    ],
 )
