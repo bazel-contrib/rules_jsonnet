@@ -306,7 +306,7 @@ def _jsonnet_library_impl(ctx):
             imports = imports,
             short_imports = short_imports,
             transitive_jsonnet_files = sources,
-            transitive_extvars = transitive_extvars,
+            transitive_extvars = depinfo.transitive_extvars,
         ),
     ]
 
