@@ -122,72 +122,38 @@ def _make_extvar_dict(
     extvars = dict()
     label = str(label)
     for key, code in ext_code.items():
-        if key in extvars:
-            fail("duplicate extVar '{}': {}".format(key, extvars.keys()))
-        extvars[key] = {
-            "value": code,
-            "type": "code",
-            "sources": [label],
-        }
+        _make_extvar_dict_update(extvars, "code", key, code, label)
     for key in ext_code_envs:
-        if key in extvars:
-            fail("duplicate extVar '{}': {}".format(key, extvars.keys()))
-        extvars[key] = {
-            "value": "",
-            "type": "code_env",
-            "sources": [label],
-        }
+        _make_extvar_dict_update(extvars, "code_env", key, None, label)
     for file, key in ext_code_files.items():
-        if key in extvars:
-            fail("duplicate extVar '{}': {}".format(key, extvars.keys()))
-
-        files = [file]
-        if type(file) != "File":
-            files = file[DefaultInfo].files.to_list()
-
-        extvars[key] = {
-            "value": files,
-            "type": "code_file",
-            "sources": [label],
-        }
+        _make_extvar_dict_update(extvars, "code_file", key, file, label)
     for file, key in ext_code_libraries.items():
-        if key in extvars:
-            fail("duplicate extVar '{}': {}".format(key, extvars.keys()))
-        extvars[key] = {
-            "value": file[DefaultInfo].files.to_list(),
-            "type": "code_library",
-            "sources": [label],
-        }
+        _make_extvar_dict_update(extvars, "code_library", key, file, label)
     for key in ext_str_envs:
-        if key in extvars:
-            fail("duplicate extVar '{}': {}".format(key, extvars.keys()))
-        extvars[key] = {
-            "value": "",
-            "type": "string_env",
-            "sources": [label],
-        }
-    for file, key in ext_str_files.items():
-        if key in extvars:
-            fail("duplicate extVar '{}': {}".format(key, extvars.keys()))
-
-        files = [file]
-        if type(file) != "File":
-            files = file[DefaultInfo].files.to_list()
-
-        extvars[key] = {
-            "value": files,
-            "type": "string_file",
-            "sources": [label],
-        }
+        _make_extvar_dict_update(extvars, "string_env", key, None, label)
+    for val, key in ext_str_files.items():
+        _make_extvar_dict_update(extvars, "string_file", key, val, label)
     for key, val in ext_strs.items():
-        if key in extvars:
-            fail("duplicate extVar '{}': {}".format(key, extvars.keys()))
-        extvars[key] = {
-            "value": val,
-            "type": "string",
-            "sources": [label],
-        }
+        _make_extvar_dict_update(extvars, "string", key, val, label)
     return extvars
+
+def _make_extvar_dict_update(extvars, extvar_type, key, val, label):
+    if key in extvars:
+        fail("duplicate extvar '{}' of type {} and {}"
+            .format(key, extvar_type, extvars[key]["type"]))
+
+    if type(val) == "string" or type(val) == "File" or val == None:
+        pass
+    elif type(val) == "Target":
+        val = val[DefaultInfo].files.to_list()[0]
+    else:
+        fail("unknown type of value {} for {} in {}".format(type(val), key, label))
+
+    extvars.update([[key, {
+        "value": val,
+        "type": extvar_type,
+        "sources": [label],
+    }]])
 
 def _extvar_to_arguments(transitive_extvars, short_path = False):
     """Converts an transitive_extvars to command line arguments
@@ -206,14 +172,14 @@ def _extvar_to_arguments(transitive_extvars, short_path = False):
         elif val["type"] == "string_env":
             args.append("--ext-str %s" % _quote(key))
         elif val["type"] == "string_file":
-            file = val["value"][0]
+            file = val["value"]
             args.append("--ext-str-file %s=%s" % (_quote(key), _quote(file.short_path if short_path else file.path)))
         elif val["type"] == "code":
             args.append("--ext-code %s=%s" % (_quote(key), _quote(val["value"])))
         elif val["type"] == "code_env":
             args.append("--ext-code %s" % _quote(key))
         elif val["type"] == "code_library" or val["type"] == "code_file":
-            file = val["value"][0]
+            file = val["value"]
             args.append("--ext-code-file %s=%s" % (_quote(key), _quote(file.short_path if short_path else file.path)))
         else:
             fail("The {} key has an unknown extvar type {}: {}".format(key, val["type"], val["sources"]))
@@ -384,6 +350,12 @@ def _jsonnet_to_json_impl(ctx):
     jsonnet_tla_code_files = ctx.attr.tla_code_files
     jsonnet_tla_code_libraries = ctx.attr.tla_code_libraries
 
+    jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, False)
+    jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, False)
+    jsonnet_tla_strs, tla_strs_stamp_inputs = _make_stamp_resolve(ctx.attr.tla_strs, ctx, False)
+    jsonnet_tla_code, tla_code_stamp_inputs = _make_stamp_resolve(ctx.attr.tla_code, ctx, False)
+    stamp_inputs = strs_stamp_inputs + code_stamp_inputs + tla_strs_stamp_inputs + tla_code_stamp_inputs
+
     transitive_extvars = _make_extvar_dict(
         ctx.label,
         jsonnet_ext_code,
@@ -401,12 +373,6 @@ def _jsonnet_to_json_impl(ctx):
         jsonnet_ext_code_libraries,
         transitive_extvars,
     )
-
-    jsonnet_ext_strs, strs_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_strs, ctx, False)
-    jsonnet_ext_code, code_stamp_inputs = _make_stamp_resolve(ctx.attr.ext_code, ctx, False)
-    jsonnet_tla_strs, tla_strs_stamp_inputs = _make_stamp_resolve(ctx.attr.tla_strs, ctx, False)
-    jsonnet_tla_code, tla_code_stamp_inputs = _make_stamp_resolve(ctx.attr.tla_code, ctx, False)
-    stamp_inputs = strs_stamp_inputs + code_stamp_inputs + tla_strs_stamp_inputs + tla_code_stamp_inputs
 
     if len(jsonnet_ext_str_file_vars) != len(jsonnet_ext_str_files):
         fail("Mismatch of ext_str_file_vars ({}) to ext_str_files ({})".format(jsonnet_ext_str_file_vars, jsonnet_ext_str_files))
@@ -745,10 +711,10 @@ _jsonnet_library_attrs = {
         allow_files = _JSONNET_FILETYPE,
     ),
     "ext_code": attr.string_dict(
-        doc = "Include code from the dict value via extvar. Variable name matches the key"
+        doc = "Include code from the dict value via extvar. Variable name matches the key",
     ),
     "ext_code_envs": attr.string_list(
-        doc = "Include code from an environment variable via extvar. Variable name matches the environment variable name"
+        doc = "Include code from an environment variable via extvar. Variable name matches the environment variable name",
     ),
     "ext_code_files": attr.label_keyed_string_dict(
         doc = "Include code from a file from dict key via extvar. Variable name matches the value",
@@ -759,14 +725,14 @@ _jsonnet_library_attrs = {
         providers = [JsonnetLibraryInfo],
     ),
     "ext_str_envs": attr.string_list(
-        doc = "Include string from an environment variable via extvar. Variable name matches the environment variable name"
+        doc = "Include string from an environment variable via extvar. Variable name matches the environment variable name",
     ),
     "ext_str_files": attr.label_keyed_string_dict(
         doc = "Include string from a file from dict key via extvar. Variable name matches the value",
         allow_files = True,
     ),
     "ext_strs": attr.string_dict(
-        doc = "Include string from the dict value via extvar. Variable name matches the key"
+        doc = "Include string from the dict value via extvar. Variable name matches the key",
     ),
 }
 
