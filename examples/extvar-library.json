@@ -1,0 +1,13 @@
+{
+   "code_env": {
+      "code": "some code"
+   },
+   "library": {
+      "workflow": { }
+   },
+   "k8s": "{STABLE_K8S_CLUSTER}",
+   "mydefine": "",
+   "non_stamp": "non_stamp",
+   "str_env": "test",
+   "str_files": "this is great\n"
+}
