@@ -59,6 +59,7 @@ def _setup_deps(deps, tla_code_libraries = {}, ext_code_libraries = {}, transiti
       deps: List of deps labels from ctx.attr.deps.
       tla_code_libraries: Dict of labels to names from ctx.attr.tla_code_files.
       ext_code_libraries: List of deps labels from ctx.attr.ext_code_files.
+      transitive_extvars: Dict of extvar to values build from _make_extvar_dict
 
     Returns:
       Returns a struct containing the following fields:
@@ -69,6 +70,9 @@ def _setup_deps(deps, tla_code_libraries = {}, ext_code_libraries = {}, transiti
         short_imports: Depset of Strings containing import flags set by
             transitive dependency targets, when invoking Jsonnet as part
             of a test where dependencies are stored in runfiles.
+        transitive_extvars: Dict of extvar to values that has merged the
+            input value with all extvars of its depdencies.
+
     """
     transitive_sources = []
     imports = []
@@ -115,42 +119,72 @@ def _make_extvar_dict(
 
     Returns:
         Dictionary with keys are variable names, and values a dict containing
-            type: The kind of extvar it is from and maps to a ctx.attr, e.g. string, code, string_file, etc.
+            type: The type of extvar it will be in jsonnet: string or code
             value: The string, code, or File depending on type
             sources: List of labels that define the extvar
     """
     extvars = dict()
     label = str(label)
-    for key, code in ext_code.items():
-        _make_extvar_dict_update(extvars, "code", key, code, label)
-    for key in ext_code_envs:
-        _make_extvar_dict_update(extvars, "code_env", key, None, label)
-    for file, key in ext_code_files.items():
-        _make_extvar_dict_update(extvars, "code_file", key, file, label)
-    for file, key in ext_code_libraries.items():
-        _make_extvar_dict_update(extvars, "code_library", key, file, label)
-    for key in ext_str_envs:
-        _make_extvar_dict_update(extvars, "string_env", key, None, label)
-    for val, key in ext_str_files.items():
-        _make_extvar_dict_update(extvars, "string_file", key, val, label)
-    for key, val in ext_strs.items():
+
+    # extvar_lists is a list of tuple (extvar: str, value: None | str | File | JsonnetInfo, extvar_type: str)
+    # The `None` value are used by environment
+    # Collect all the Code extvars
+    # ext_code, dict[extvar, str_value]
+    extvar_code_lists = zip(ext_code.keys(), ext_code.values())
+
+    # ext_code_envs, list[extvar]
+    extvar_code_lists.extend(zip(ext_code_envs, [None] * len(ext_code_envs)))
+
+    # ext_code_files, dict[label, extvar]
+    extvar_code_lists.extend(zip(ext_code_files.values(), ext_code_files.keys()))
+
+    # ext_code_libraries, dict[label, extvar]
+    extvar_code_lists.extend(zip(ext_code_libraries.values(), ext_code_libraries.keys()))
+
+    for key, val in extvar_code_lists:
+        _make_extvar_dict_update(extvars, "code", key, val, label)
+
+    # Collect all of the String extvars
+    # ext_str_envs, list[extvar]
+    extvar_str_lists = zip(ext_str_envs, [None] * len(ext_str_envs))
+
+    # ext_str_files, dict[label, extvar]
+    extvar_str_lists.extend(zip(ext_str_files.values(), ext_str_files.keys()))
+
+    # ext_strs, dict[extvar, str]
+    extvar_str_lists.extend(zip(ext_strs.keys(), ext_strs.values()))
+
+    for key, val in extvar_str_lists:
         _make_extvar_dict_update(extvars, "string", key, val, label)
+
     return extvars
 
-def _make_extvar_dict_update(extvars, extvar_type, key, val, label):
-    if key in extvars:
+def _make_extvar_dict_update(extvars, extvar_type, extvar_name, value, label):
+    """Adds an entry to a given extrvars dict and validates its uniqueness
+
+    Args:
+        extvars: Dict of extvars to be added to
+        extvar_type: String of either "string" or "code"
+        extvar_name: String of the extvar variable name
+        value: Either a None, string, File or Target
+        label: String of the package this extvar is defined in
+
+    Returns:
+        None, modifies the given extvars input in-place
+    """
+    if extvar_name in extvars:
         fail("duplicate extvar '{}' of type {} and {}"
-            .format(key, extvar_type, extvars[key]["type"]))
+            .format(extvar_name, extvar_type, extvars[extvar_name]["type"]))
 
-    if type(val) == "string" or type(val) == "File" or val == None:
+    if type(value) == "string" or type(value) == "File" or value == None:
         pass
-    elif type(val) == "Target":
-        val = val[DefaultInfo].files.to_list()[0]
+    elif type(value) == "Target":
+        value = value[DefaultInfo].files.to_list()[0]
     else:
-        fail("unknown type of value {} for {} in {}".format(type(val), key, label))
+        fail("unknown type of value {} for {} in {}".format(type(value), extvar_name, label))
 
-    extvars.update([[key, {
-        "value": val,
+    extvars.update([[extvar_name, {
+        "value": value,
         "type": extvar_type,
         "sources": [label],
     }]])
@@ -167,22 +201,24 @@ def _extvar_to_arguments(transitive_extvars, short_path = False):
     """
     args = []
     for key, val in transitive_extvars.items():
-        if val["type"] == "string":
-            args.append("--ext-str %s=%s" % (_quote(key), _quote(val["value"])))
-        elif val["type"] == "string_env":
-            args.append("--ext-str %s" % _quote(key))
-        elif val["type"] == "string_file":
+        # The --ext-str-* and --ext-code-* flag families are interchangable,
+        # so the `type` is used to determine which to use.
+        flag_type = "str" if val["type"] == "string" else val["type"]
+
+        # Each different type of value is formatted in the flags differently
+        if val["value"] == None:
+            # Environment flags
+            args.append("--ext-%s %s" % (flag_type, _quote(key)))
+        elif type(val["value"]) == "string":
+            # String flags
+            args.append("--ext-%s %s=%s" % (flag_type, _quote(key), _quote(val["value"])))
+        elif type(val["value"]) == "File":
+            # Files and library flags
             file = val["value"]
-            args.append("--ext-str-file %s=%s" % (_quote(key), _quote(file.short_path if short_path else file.path)))
-        elif val["type"] == "code":
-            args.append("--ext-code %s=%s" % (_quote(key), _quote(val["value"])))
-        elif val["type"] == "code_env":
-            args.append("--ext-code %s" % _quote(key))
-        elif val["type"] == "code_library" or val["type"] == "code_file":
-            file = val["value"]
-            args.append("--ext-code-file %s=%s" % (_quote(key), _quote(file.short_path if short_path else file.path)))
+            file_path = file.short_path if short_path else file.path
+            args.append("--ext-%s-file %s=%s" % (flag_type, _quote(key), _quote(file_path)))
         else:
-            fail("The {} key has an unknown extvar type {}: {}".format(key, val["type"], val["sources"]))
+            fail("The {} key has an unknown extvar type {}: {}".format(key, type(val["value"]), val["sources"]))
 
     return args
 
