@@ -120,7 +120,8 @@ jsonnet_to_json_test(
 jsonnet_library(
     name = "code_library_lib",
     srcs = ["code_library.libsonnet"],
-    deps = [":workflow"]
+    deps = [":workflow"],
+    data = [":test_str_files"]
 )
 
 jsonnet_to_json_test(

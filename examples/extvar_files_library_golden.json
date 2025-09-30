@@ -1,16 +1,17 @@
 {
-   "job": {
-      "deps": [ ],
-      "inputs": [ ],
-      "outputs": [ ],
-      "type": "base"
-   },
-   "shJob": {
-      "command": "",
-      "deps": [ ],
-      "inputs": [ ],
-      "outputs": [ ],
-      "type": "sh",
-      "vars": { }
-   }
+  "job": {
+    "deps": [],
+    "inputs": [],
+    "outputs": [],
+    "type": "base"
+  },
+  "shJob": {
+    "command": "",
+    "deps": [],
+    "inputs": [],
+    "outputs": [],
+    "type": "sh",
+    "vars": {}
+  },
+  "data": "this is great\n"
 }

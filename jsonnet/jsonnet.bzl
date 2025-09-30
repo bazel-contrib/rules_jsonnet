@@ -91,7 +91,7 @@ def _setup_deps(deps, tla_code_libraries = {}, ext_code_libraries = {}):
 def _jsonnet_library_impl(ctx):
     """Implementation of the jsonnet_library rule."""
     depinfo = _setup_deps(ctx.attr.deps)
-    sources = depset(ctx.files.srcs, transitive = [depinfo.transitive_sources])
+    sources = depset(ctx.files.srcs + ctx.files.data, transitive = [depinfo.transitive_sources])
     imports = depset(
         _get_import_paths(ctx.label, ctx.files.srcs, ctx.attr.imports, False),
         transitive = [depinfo.imports],
