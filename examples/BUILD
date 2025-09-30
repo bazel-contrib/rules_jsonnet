@@ -120,15 +120,15 @@ jsonnet_to_json_test(
 jsonnet_library(
     name = "code_library_lib",
     srcs = ["code_library.libsonnet"],
+    data = [":test_str_files"],
     deps = [":workflow"],
-    data = [":test_str_files"]
 )
 
 jsonnet_to_json_test(
     name = "extvar_code_library_test",
     size = "small",
     src = "extvar_code_library.jsonnet",
-    ext_code_libraries = { ":code_library_lib": "codefile" },
+    ext_code_libraries = {":code_library_lib": "codefile"},
     golden = "extvar_files_library_golden.json",
 )
 
@@ -136,8 +136,8 @@ jsonnet_to_json_test(
     name = "tla_code_library_test",
     size = "small",
     src = "tla_code_library.jsonnet",
-    tla_code_libraries = { ":code_library_lib": "tla_code" },
     golden = "tla_code_library_golden.json",
+    tla_code_libraries = {":code_library_lib": "tla_code"},
 )
 
 jsonnet_to_json_test(
