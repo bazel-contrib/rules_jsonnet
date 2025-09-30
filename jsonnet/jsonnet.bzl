@@ -297,9 +297,15 @@ def _jsonnet_to_json_impl(ctx):
         outputs.append(compiled_json)
         command += [ctx.file.src.path, "-o", compiled_json.path]
 
-    transitive_data = depset(transitive = [dep.data_runfiles.files for dep in ctx.attr.deps] +
-                                          [l.files for l in jsonnet_tla_code_files.keys()] +
-                                          [l.files for l in jsonnet_tla_str_files.keys()])
+    transitive_data = depset(
+        transitive =
+            [dep.data_runfiles.files for dep in ctx.attr.deps] +
+            [l.files for l in jsonnet_tla_code_files.keys()] +
+            [l.files for l in jsonnet_tla_str_files.keys()] +
+            [l[DefaultInfo].data_runfiles.files for l in jsonnet_tla_code_libraries.keys()] +
+            [l[DefaultInfo].data_runfiles.files for l in jsonnet_ext_code_libraries.keys()],
+    )
+
     # NB(sparkprime): (1) transitive_data is never used, since runfiles is only
     # used when .files is pulled from it.  (2) This makes sense - jsonnet does
     # not need transitive dependencies to be passed on the commandline. It
@@ -502,7 +508,9 @@ def _jsonnet_to_json_test_impl(ctx):
     transitive_data = depset(
         transitive = [dep.data_runfiles.files for dep in ctx.attr.deps] +
                      [l.files for l in jsonnet_tla_code_files.keys()] +
-                     [l.files for l in jsonnet_tla_str_files.keys()],
+                     [l.files for l in jsonnet_tla_str_files.keys()] +
+                     [l[DefaultInfo].data_runfiles.files for l in jsonnet_tla_code_libraries.keys()] +
+                     [l[DefaultInfo].data_runfiles.files for l in jsonnet_ext_code_libraries.keys()],
     )
 
     test_inputs = (
