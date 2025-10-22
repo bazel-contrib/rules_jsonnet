@@ -11,13 +11,6 @@ tasks:
     build_targets:
     - //...
 
-  docs:
-    name: docs
-    platform: ${{ platform }}
-    working_directory: docs
-    test_targets:
-    - //...
-
   examples_go:
     name: examples
     platform: ${{ platform }}
