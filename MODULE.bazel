@@ -7,7 +7,7 @@ bazel_dep(name = "bazel_skylib", version = "1.8.1")
 bazel_dep(name = "jsonnet", version = "0.21.0")
 bazel_dep(name = "jsonnet_go", version = "0.21.0")
 bazel_dep(name = "rules_python", version = "1.6.3")
-bazel_dep(name = "rules_rust", version = "0.65.0")
+bazel_dep(name = "rules_rust", version = "0.68.0")
 
 jsonnet = use_extension("//jsonnet:extensions.bzl", "jsonnet")
 use_repo(jsonnet, "rules_jsonnet_toolchain")
