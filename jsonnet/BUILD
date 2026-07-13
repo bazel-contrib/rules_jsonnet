@@ -35,7 +35,10 @@ py_binary(
     visibility = ["//visibility:public"],
 )
 
-toolchain_type(name = "toolchain_type")
+toolchain_type(
+    name = "toolchain_type",
+    visibility = ["//visibility:public"],
+)
 
 jsonnet_toolchain(
     name = "rust_jsonnet",
