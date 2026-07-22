@@ -36,6 +36,7 @@ def _jsonnet_impl(module_ctx):
         name = "rules_jsonnet_toolchain",
         compiler = _get_jsonnet_compiler(module_ctx),
     )
+    return module_ctx.extension_metadata(reproducible = True)
 
 jsonnet = module_extension(
     implementation = _jsonnet_impl,
@@ -59,6 +60,7 @@ alias(
 """ % ctx.attr.compiler,
         executable = False,
     )
+    return ctx.repo_metadata(reproducible = True)
 
 _jsonnet_toolchain_repo = repository_rule(
     implementation = _jsonnet_toolchain_repo_impl,
