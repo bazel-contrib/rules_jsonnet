@@ -53,6 +53,10 @@ crate.annotation(
 )
 crate.from_specs(
     name = "crates_jsonnet",
+    # Dependency resolution must be pinned for distribution.
+    # Repin with: bazel fetch --repo=@crates_jsonnet --repo_env=CARGO_BAZEL_REPIN=1
+    cargo_lockfile = "//:Cargo.lock",
     host_tools = "@rust_host_tools_jsonnet",
+    lockfile = "//:Cargo.Bazel.lock",
 )
 use_repo(crate, "crates_jsonnet")
