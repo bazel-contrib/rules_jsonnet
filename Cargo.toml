@@ -1,0 +1,8 @@
+[package]
+name = "rules_jsonnet_crates"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+jrsonnet = "0.5.0-pre95"
